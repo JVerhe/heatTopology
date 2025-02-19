@@ -1,0 +1,5 @@
+build/
+
+
+# Exclude compiled files
+*.[!.]*
