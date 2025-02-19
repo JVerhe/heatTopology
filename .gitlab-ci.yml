@@ -34,7 +34,7 @@ python-test-job: # This job runs in the test stage.
   script:
     - echo "Running unit tests..."
     - python --version ; pip --version # For debugging
-    - for f in test/.py; do python3 "$f"; done
+    - for f in test/*.py; do python3 "$f"; done
     - echo "Python tests done, \#coverage not implemented yet"
 
 lint-test-job: # This job also runs in the test stage.
