@@ -1,3 +1,0 @@
-/home/jver/documents/univ/MA2/projectME/team_02/build/CMakeFiles/HELLO.dir
-/home/jver/documents/univ/MA2/projectME/team_02/build/CMakeFiles/edit_cache.dir
-/home/jver/documents/univ/MA2/projectME/team_02/build/CMakeFiles/rebuild_cache.dir
