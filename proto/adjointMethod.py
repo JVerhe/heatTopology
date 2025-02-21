@@ -14,7 +14,7 @@ def adjoint(T, v, corners, p=1):
         gradJv (np.ndarray): A column vector of size(n) containing the derivative of the cost function with respect to the fraction of metal in each of the n elements.
 
     """
-    elements = T.size
+    elements = v.size
     gradJv = np.zeros((elements,1))
     km = 65
     kp = 0.2
@@ -23,6 +23,6 @@ def adjoint(T, v, corners, p=1):
     for el in range(elements):
         elementNodes = corners[el]
         Te = np.take(T, elementNodes)
-        gradJv[el] = - 0.5 * p * (v[el] ** (p - 1)) * (km - kp) * Te.T @ K0 @ Te
+        gradJv[el] = - 0.5 * p * (v[el] ** (p - 1)) * (km - kp) * (Te.T @ K0 @ Te)
 
     return gradJv
