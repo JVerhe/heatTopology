@@ -36,6 +36,5 @@ python-test-job: # This job runs in the test stage.
     - cd proto
     - pip install -r requirements.txt
     - cd ../test
-    - pwd
     - for f in *.py; do python3 "$f"; done
     - echo "Python tests done, \#coverage not implemented yet"
