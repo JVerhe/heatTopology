@@ -20,17 +20,28 @@ stages: # List of stages for jobs, and their order of execution
   - build
   - test
 
-build-job: # TODO
+default:
+  - image: gcc:latest
+
+build-job:
   stage: build
-  image: gcc:latest
   before_script:
     - apt-get update && apt-get install cmake -y
-  script:
-    - pwd
     - apt-get install libeigen3-dev
+  script:
     - cd build
     - cmake ..
     - cmake --build .
+  cache:
+    paths:
+      - build/
+
+cpp-test-job:
+  stage: test
+  dependencies:
+    - build-job
+  script:
+    - pwd
 
 python-test-job: # This job runs in the test stage.
   stage: test # It only starts when the job in the build stage completes successfully.
@@ -42,4 +53,3 @@ python-test-job: # This job runs in the test stage.
     - pip install -r requirements.txt
     - cd ../test
     - for f in *.py; do python3 "$f"; done
-    - echo "Python tests done, \#coverage not implemented yet"
