@@ -25,12 +25,11 @@ build-job:
   image: gcc:latest
   before_script:
     - apt-get update && apt-get install cmake -y
-    - apt-get install libeigen3-dev
+    - apt-get install libeigen3-dev -y
   script:
     - cd build
     - cmake ..
     - cmake --build .
-    - ./adjointMethod
   cache:
     paths:
       - build/
