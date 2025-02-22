@@ -8,6 +8,3 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 # The following lines define an executable and compilation flags
 add_executable(adjointMethod src/adjointMethod.cpp)
 target_compile_options(adjointMethod PRIVATE -Wextra -Wall)
-
-add_executable(test src/test.cpp)
-target_compile_options(test PRIVATE -Wextra -Wall)
