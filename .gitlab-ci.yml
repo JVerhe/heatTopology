@@ -30,6 +30,7 @@ build-job:
     - cd build
     - cmake ..
     - cmake --build .
+    - ./adjointMethod
   cache:
     paths:
       - build/
