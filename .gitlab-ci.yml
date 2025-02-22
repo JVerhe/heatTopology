@@ -20,11 +20,9 @@ stages: # List of stages for jobs, and their order of execution
   - build
   - test
 
-default:
-  - image: gcc:latest
-
 build-job:
   stage: build
+  image: gcc:latest
   before_script:
     - apt-get update && apt-get install cmake -y
     - apt-get install libeigen3-dev
@@ -38,6 +36,7 @@ build-job:
 
 cpp-test-job:
   stage: test
+  image: gcc:latest
   dependencies:
     - build-job
   script:
