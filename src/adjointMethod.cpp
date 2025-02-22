@@ -1,15 +1,20 @@
 #include <iostream>
-#include <Eigen/Dense>  // Include the dense matrix module
+#include <Eigen/Dense>
+#include <map>
+#include "adjointMethod.hpp"
 
 int main() {
-    Eigen::Matrix2d mat;  // 2x2 matrix of doubles
-    mat << 1, 2,
-        3, 4;  // Initializing the matrix
 
-    Eigen::Vector2d vec(5, 6);  // 2D vector
+    using namespace Eigen;
+    std::map<int, std::vector<int>> corners;
+    corners[0] = { 3, 4, 0, 1 };
+    corners[1] = { 4, 5, 1, 2 };
+    corners[2] = { 6, 7, 3, 4 };
+    corners[3] = { 7, 8, 4, 5 };
 
-    Eigen::Vector2d result = mat * vec;  // Matrix-vector multiplication
+    Vector<double, 9> T{ 273, 274, 271, 273, 272, 275, 271, 270, 272 };
+    Vector<double, 4> v{ 0.5, 0.5, 0.5, 0.5 };
+    adjoint(T, v, corners);
 
-    std::cout << "Result:\n" << result << std::endl;
     return 0;
 }
