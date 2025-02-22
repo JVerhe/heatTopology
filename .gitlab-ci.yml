@@ -25,6 +25,7 @@ stages: # List of stages for jobs, and their order of execution
 build-job: # TODO
   stage: build
   script:
+    - ./vcpkg install eigen3
     - cd build
     - cmake ..
     - cmake --build .
