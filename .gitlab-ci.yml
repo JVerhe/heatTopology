@@ -40,14 +40,13 @@ cpp-test-job:
   dependencies:
     - build-job
   script:
-    - pwd
+    - echo "Running c++ unit tests..."
 
-python-test-job: # This job runs in the test stage.
-  stage: test # It only starts when the job in the build stage completes successfully.
+python-test-job:
+  stage: test
   image: python:latest
   script:
-    - echo "Running unit tests..."
-    - python --version ; pip --version # For debugging
+    - echo "Running Python unit tests..."
     - cd proto
     - pip install -r requirements.txt
     - cd ../test
