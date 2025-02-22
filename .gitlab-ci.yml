@@ -25,7 +25,8 @@ stages: # List of stages for jobs, and their order of execution
 build-job: # TODO
   stage: build
   script:
-    - sudo apt-get install libeigen3-dev
+    - pwd
+    - apt-get install libeigen3-dev
     - cd build
     - cmake ..
     - cmake --build .
