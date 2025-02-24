@@ -2,10 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from meshHelper import *
 from optimization import optimize
-
-
+import matplotlib
+matplotlib.use('TKAgg') 
 L = 0.01 
-number_of_points = 9
+number_of_points = 40
 p = 3
 T_k =  293
 
@@ -29,10 +29,9 @@ x = optimize(
     rectangles=rectangles,
     L=L,
     boundary_temp=T_k,
-    ft=0,
+    ft=2,
 )
 
-print(x)
 for e in x: assert(e<=1)
 
 

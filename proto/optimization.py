@@ -1,8 +1,8 @@
 import numpy as np
-from scipy.sparse import coo_matrix, csr_matrix 
-import matplotlib.pyplot as plt
-from math import ceil, sqrt
-from optHelper import adjoint
+from math import ceil
+from optHelper import *
+from scipy.sparse import coo_matrix
+from meshHelper import create_coordinates, filter_boundary_points_with_index, apply_boundary, find_F, find_K, objective
 
 def optimize(K0,F,max_vol_frac,nx,ny,penal,rectangles,L,boundary_temp,ft):
     """
@@ -42,17 +42,34 @@ def optimize(K0,F,max_vol_frac,nx,ny,penal,rectangles,L,boundary_temp,ft):
     N_points_1D = nx+1
 
     #Prepare filter
-    #iH = np.ones((nx*ny*(2*(ceil(rmin)-1)+1)**2,1))
-    #jH = np.ones(np.shape(iH))
-    #sH = np.zeros(np.shape(iH))
+    iH = np.ones((nx*ny*(2*(ceil(rmin)-1)+1)**2,1))
+    jH = np.ones(np.shape(iH))
+    sH = np.zeros(np.shape(iH))
     #H = sH 
     #H = coo_matrix(sH, (iH, jH))
     #Hs =  np.sum(H,axis=1)
-    #TODO: Prepare filter further
+    iH = []
+    jH = []
+    sH = []
+
+    # Construct filter matrix
+    for i1 in range(nx):
+        for j1 in range(ny):
+            e1 = i1 * ny + j1
+            for i2 in range(max(i1 - int(np.ceil(rmin)) + 1, 0), min(i1 + int(np.ceil(rmin)), nx)):
+                for j2 in range(max(j1 - int(np.ceil(rmin)) + 1, 0), min(j1 + int(np.ceil(rmin)), ny)):
+                    e2 = i2 * ny + j2
+                    weight = max(0, rmin - np.sqrt((i1 - i2) ** 2 + (j1 - j2) ** 2))
+                    iH.append(e1)
+                    jH.append(e2)
+                    sH.append(weight)
+
+    # Create sparse matrix H
+    H = coo_matrix((sH, (iH, jH)), shape=(nx * ny, nx * ny))
+    # Compute sum of each row
+    Hs = np.array(H.sum(axis=1)).flatten()
 
     #prepare for optimization iterations
-    #x = np.tile(max_vol_frac,(ny,nx))
-    #x = x.flatten(order='F') #needed? from matrix to vector
     x = np.ones(nx*ny)*max_vol_frac
     xPhys = x
     loop = 0
@@ -76,14 +93,13 @@ def optimize(K0,F,max_vol_frac,nx,ny,penal,rectangles,L,boundary_temp,ft):
         dv = np.ones(len(dc))# Sensitivity of volume constraint
 
         #Filtering/Modification of sensitivities
-        """
+        
         if ft==1: #sensitivity filtering
-            dc = (H @ (x.ravel(order='F') * dc.ravel(order='F'))) / Hs / np.maximum(1e-3, x.ravel(order='F'))
+            dc = (H @ (x*dc)) / (Hs*np.maximum(1e-3,x))
         elif ft==2: #density filtering
-            dc = H@(dc.ravel(order='F')/Hs)
-            dv = H@(dv.ravel(order='F')/Hs)
+            dc = H@(dc/Hs)
+            dv = H@(dv/Hs)
         #else (ft==0): continue
-        """
 
         #optimality criteria update of design variables and physical densities
         l1=0
@@ -101,24 +117,16 @@ def optimize(K0,F,max_vol_frac,nx,ny,penal,rectangles,L,boundary_temp,ft):
                 else: xnew[e] = Bx[e]
 
             xnew = np.maximum(0, np.where(np.maximum(x - move, 0) > x * B, np.maximum(x - move, 0), np.where(np.minimum(x + move, 1) < x * B, np.minimum(x + move, 1), x * B)))
-
             # xnew = np.maximum(0,np.maximum(x-move,np.minimum(x+move,x*B)))
 
-            #print("npmin",np.minimum(x+move,x*B))
-            xPhys = xnew
-            if np.sum(xPhys) > max_vol_frac*nx*nx:
-                #print("np.sum(xPhys) too big:",np.sum(xPhys))
-                l1 = lmid 
-            else: l2 = lmid
-            """
-            if ft == 1 or ft == 0:
+            if ft == 0 or ft == 1:
                 xPhys = xnew
             elif ft == 2:
-                xPhys = (H@xnew.ravel(order='F'))/Hs
-            if np.sum(xPhys) > max_vol_frac*(nx):
-                l1 = lmid
+                xPhys = (H@xnew)/Hs
+            
+            if np.sum(xPhys) > max_vol_frac*nx*nx:
+                l1 = lmid 
             else: l2 = lmid
-            """
         
         #print(xPhys)
         change = np.max(np.abs(xnew-x))
