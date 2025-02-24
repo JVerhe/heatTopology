@@ -203,8 +203,15 @@ def optimization(K0,F,max_vol_frac,nx,ny,penal,rectangles,L,boundary_temp,ft):
         while (l2-l1)/(l1+l2) > 1e-3:
             lmid = 0.5*(l1+l2)
             #print("l2=",l2)
-            B = np.sqrt(np.maximum(-dc/(dv*lmid),0)) #neg. values close to e_mach do not have np.sqrt()
-            xnew = np.maximum(0,np.maximum(x-move,np.minimum(x+move,x*B)))
+            Bx = np.sqrt(np.maximum(-dc/(dv*lmid),0))*x #neg. values close to e_mach do not have np.sqrt()
+            xnew = np.zeros(len(x))
+            for e in range(len(xnew)):
+                if Bx[e] <= max(0,x[e]-move): xnew[e] = max(0,x[e]-move)
+                elif Bx[e] >= min(1,x[e]-move): xnew[e] = min(1,x[e]+move)
+                else: xnew[e] = Bx[e]
+            
+            # xnew = np.maximum(0,np.maximum(x-move,np.minimum(x+move,x*B)))
+
             #print("npmin",np.minimum(x+move,x*B))
             xPhys = xnew
             if np.sum(xPhys) > max_vol_frac*nx*nx:
