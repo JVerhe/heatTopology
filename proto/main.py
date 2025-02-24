@@ -44,6 +44,7 @@ x = optimization(
 )
 
 print(x)
+for e in x: assert(e<=1)
 
 
 

@@ -184,7 +184,6 @@ def optimization(K0,F,max_vol_frac,nx,ny,penal,rectangles,L,boundary_temp,ft):
         dc = adjoint(U,xPhys,rectangles,K0,p=penal).ravel() #sensitivity of objective
         assert(np.shape(dc) == np.shape(xPhys))
         dv = np.ones(len(dc))# Sensitivity of volume constraint
-        #dv = dv.flatten(order='F')#from matrix to vector, is this okay?
 
         #Filtering/Modification of sensitivities
         """
@@ -199,17 +198,20 @@ def optimization(K0,F,max_vol_frac,nx,ny,penal,rectangles,L,boundary_temp,ft):
         #optimality criteria update of design variables and physical densities
         l1=0
         l2=1e9
-        move = 0.2 #m in paper
+        move = 0.1 #m in paper
         while (l2-l1)/(l1+l2) > 1e-3:
             lmid = 0.5*(l1+l2)
             #print("l2=",l2)
-            Bx = np.sqrt(np.maximum(-dc/(dv*lmid),0))*x #neg. values close to e_mach do not have np.sqrt()
+            B = np.sqrt(np.maximum(-dc/(dv*lmid),0)) #neg. values close to e_mach do not have np.sqrt()
+            Bx = B*x
             xnew = np.zeros(len(x))
             for e in range(len(xnew)):
                 if Bx[e] <= max(0,x[e]-move): xnew[e] = max(0,x[e]-move)
                 elif Bx[e] >= min(1,x[e]-move): xnew[e] = min(1,x[e]+move)
                 else: xnew[e] = Bx[e]
-            
+
+            xnew = np.maximum(0, np.where(np.maximum(x - move, 0) > x * B, np.maximum(x - move, 0), np.where(np.minimum(x + move, 1) < x * B, np.minimum(x + move, 1), x * B)))
+
             # xnew = np.maximum(0,np.maximum(x-move,np.minimum(x+move,x*B)))
 
             #print("npmin",np.minimum(x+move,x*B))
