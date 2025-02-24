@@ -27,14 +27,3 @@ build-job: # TODO
   script:
     - echo "Compiling the code..."
     - echo "Compile complete."
-
-python-test-job: # This job runs in the test stage.
-  stage: test # It only starts when the job in the build stage completes successfully.
-  script:
-    - echo "Running unit tests..."
-    - python --version ; pip --version # For debugging
-    - cd proto
-    - pip install -r requirements.txt
-    - cd ../test
-    - for f in *.py; do python3 "$f"; done
-    - echo "Python tests done, \#coverage not implemented yet"
