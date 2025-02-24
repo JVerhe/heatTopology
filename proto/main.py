@@ -1,16 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from math import ceil, sqrt
-from helper_functions import *
+from meshHelper import *
+from optimization import optimize
 
 
 L = 0.01 
-outlet = 0.004    
-number_of_points = 100
-number_of_rectangle = (number_of_points-1)*(number_of_points-1)
+number_of_points = 9
 p = 3
-k_min = 0.2
-k_max = 65
 T_k =  293
 
 local_matrix = [[2/3,-1/6,-1/3,-1/6],[-1/6,2/3,-1/6,-1/3],[-1/3,-1/6,2/3,-1/6],[-1/6,-1/3,-1/6,2/3]]
@@ -18,19 +14,12 @@ local_matrix = [[2/3,-1/6,-1/3,-1/6],[-1/6,2/3,-1/6,-1/3],[-1/3,-1/6,2/3,-1/6],[
 rectangles = create_rectangle_and_mesh(number_of_points)
 coordinates = create_coordinates(L,number_of_points)
 boundary_points = filter_boundary_points_with_index(coordinates,L)
-
-
-v = np.ones(number_of_rectangle)*0.2
-k_values = fill_in_k(v,65,0.2,p)
-K = find_K(v,rectangles,number_of_points,local_matrix,k_min,k_max,p)
 F = find_F(rectangles,number_of_points,L)
-K,F = apply_boundary(K,F,boundary_points,T_k) ; T = np.linalg.solve(K,F)  
 
 
 #################################################### Optimisation ###################################################
 
-
-x = optimization(
+x = optimize(
     K0=local_matrix,
     F=F,
     max_vol_frac=0.4,
@@ -45,35 +34,6 @@ x = optimization(
 
 print(x)
 for e in x: assert(e<=1)
-
-
-
-
-
-
-
-
-
-
-
-
-
-def grad_f(v):
-    """
-    This function accomplishes the same as adjointMethod and is therefore redundant.
-    """
-    gradient_D = np.zeros(number_of_rectangle)
-    k_values = fill_in_k(v,k_max,k_min,p)
-    for e,rectangle in enumerate(rectangles):
-        k_e = k_values[e]  
-        T_loc = np.zeros((4,1))
-        for l in range(4):
-            T_loc[l][0]=T[int(rectangle[l])]
-        
-        K = np.array(local_matrix)*k_e
-        gradient_D[e] = ((-1/2)*p*((v[e])**(p-1))*(k_max-k_min)*((T_loc.T)@K@T_loc)*(1/k_e))[0][0]
-        
-    return gradient_D
 
 
 # T_matrix = T.reshape((number_of_points, number_of_points))
