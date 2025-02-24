@@ -36,7 +36,7 @@ x = optimize(
     rectangles=rectangles,
     L=L,
     boundary_temp=T_k,
-    ft=0,
+    ft=2,
 )
 
 f = open("results.txt", "w")
