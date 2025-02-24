@@ -73,7 +73,7 @@ def optimize(K0,F,max_vol_frac,nx,ny,penal,rectangles,L,boundary_temp,ft):
     x = np.ones(nx*ny)*max_vol_frac
     xPhys = x
     loop = 0
-    change = 0.4
+    change = 1
     coordinates = create_coordinates(L,N_points_1D)
     boundary_points=filter_boundary_points_with_index(coordinates,L)
     #start iteration
@@ -104,7 +104,7 @@ def optimize(K0,F,max_vol_frac,nx,ny,penal,rectangles,L,boundary_temp,ft):
         #optimality criteria update of design variables and physical densities
         l1=0
         l2=1e9
-        move = 0.1 #m in paper
+        move = 0.3 #m in paper
         while (l2-l1)/(l1+l2) > 1e-3:
             lmid = 0.5*(l1+l2)
             #print("l2=",l2)
