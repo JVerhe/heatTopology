@@ -5,14 +5,15 @@ from meshHelper import *
 from optimization import optimize
 import sys
 
-try:
-    number_of_points = int(sys.argv[1])
-except:
-    print("You must give a number of discretization points when executing this file: ex. python3 main.py 30")
-    exit()
+# try:
+#     number_of_points = int(sys.argv[1])
+# except:
+#     print("You must give a number of discretization points when executing this file: ex. python3 main.py 30")
+#     exit()
 
 #################################################### Discretisation ###################################################
 
+number_of_points = 40
 L = 0.01 
 p = 3
 T_k =  293
