@@ -1,8 +1,8 @@
 import numpy as np
 from scipy.sparse import coo_matrix, csr_matrix 
 import matplotlib.pyplot as plt
-from math import ceil, sqrt
 from optHelper import adjoint
+from meshHelper import *
 
 def optimize(K0,F,max_vol_frac,nx,ny,penal,rectangles,L,boundary_temp,ft):
     """
