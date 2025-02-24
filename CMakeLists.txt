@@ -6,5 +6,5 @@ find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 # The following lines define an executable and compilation flags
-add_executable(adjointMethod src/adjointMethod.cpp)
-target_compile_options(adjointMethod PRIVATE -Wextra -Wall)
+add_executable(main src/main.cpp)
+target_compile_options(main PRIVATE -Wextra -Wall)
