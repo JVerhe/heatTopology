@@ -16,14 +16,28 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
 
-image: python:latest
-
 stages: # List of stages for jobs, and their order of execution
   - build
   - test
 
-build-job: # TODO
+build-job:
   stage: build
+  image: gcc:latest
+  before_script:
+    - apt-get update && apt-get install cmake -y
+    - apt-get install libeigen3-dev -y
   script:
-    - echo "Compiling the code..."
-    - echo "Compile complete."
+    - cd build
+    - cmake ..
+    - cmake --build .
+  cache:
+    paths:
+      - build/
+
+cpp-test-job:
+  stage: test
+  image: gcc:latest
+  dependencies:
+    - build-job
+  script:
+    - echo "Running c++ unit tests..."

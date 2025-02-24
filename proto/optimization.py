@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from math import ceil, sqrt
 from meshHelper import *
 from optHelper import adjoint
+from meshHelper import *
 
 def optimize(K0,F,max_vol_frac,nx,ny,penal,rectangles,L,boundary_temp,ft):
     """
