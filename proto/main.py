@@ -6,7 +6,7 @@ from helper_functions import *
 
 L = 0.01 
 outlet = 0.004    
-number_of_points =10
+number_of_points = 100
 number_of_rectangle = (number_of_points-1)*(number_of_points-1)
 p = 3
 k_min = 0.2
@@ -87,10 +87,10 @@ def grad_f(v):
 
 
 
-# X_matrix = (np.array(result.x)).reshape((number_of_points-1, number_of_points-1))     
-# plt.imshow(X_matrix, cmap='hot', interpolation='nearest')
-# plt.colorbar()
-# plt.show()
+X_matrix = (np.array(x)).reshape((number_of_points-1, number_of_points-1))     
+plt.imshow(X_matrix, cmap='hot', interpolation='nearest')
+plt.colorbar()
+plt.show()
 
 
 
