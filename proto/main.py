@@ -5,7 +5,7 @@ from optimization import optimize
 
 
 L = 0.01 
-number_of_points = 9
+number_of_points = 50
 p = 3
 T_k =  293
 
@@ -47,8 +47,9 @@ for e in x: assert(e<=1)
 
 
 
-X_matrix = (np.array(x)).reshape((number_of_points-1, number_of_points-1))     
-plt.imshow(X_matrix, cmap='hot', interpolation='nearest')
+X_matrix = np.array(x).reshape((number_of_points-1, number_of_points-1))   
+X_matrix = transform_matrix(X_matrix)  
+plt.imshow(X_matrix, cmap='gray_r', interpolation='nearest')
 plt.colorbar()
 plt.show()
 
