@@ -20,12 +20,14 @@ stages: # List of stages for jobs, and their order of execution
   - build
   - test
 
+before_script:
+  - apt-get update && apt-get install cmake -y
+  - apt-get install libeigen3-dev -y
+
 build-job:
   stage: build
   image: gcc:latest
-  before_script:
-    - apt-get update && apt-get install cmake -y
-    - apt-get install libeigen3-dev -y
+
   script:
     - cd build
     - cmake ..
@@ -40,4 +42,7 @@ cpp-test-job:
   dependencies:
     - build-job
   script:
-    - echo "Running c++ unit tests..."
+    - cd build
+    - cmake -DBUILD_TESTS=ON ..
+    - cmake --build .
+    - cmake --build . --target run_tests
