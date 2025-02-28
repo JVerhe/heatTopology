@@ -36,6 +36,6 @@ Compilation flags can be changed in CMakeLists.txt
 
 ## Deleting log files
 
-- Deleting all the log files can be done by running the command:
+- Deleting all the log files in `/build/output` can be done by running the command:
 
 `cmake --build . --target clean_logs`
