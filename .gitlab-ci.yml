@@ -54,7 +54,7 @@ run-tests:
   stage: test
   image: gcc:latest
   dependencies:
-    - build-job
+    - build-tests
   script:
     - cd build
     - cmake --build . --target run_tests
