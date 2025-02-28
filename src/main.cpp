@@ -8,7 +8,7 @@ int main() {
     double  L = 0.01;
     int p = 2;
     double T_k = 293;
-    int number_of_points = 10;
+    int number_of_points = 20;
     double vol_frac = 0.4;
 
     Eigen::Matrix4d local_matrix;
