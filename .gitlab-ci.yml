@@ -36,7 +36,7 @@ build-job:
     paths:
       - build/
 
-build-tests:
+cpp-test-job:
   stage: test
   image: gcc:latest
   dependencies:
@@ -45,18 +45,4 @@ build-tests:
     - cd build
     - cmake -DBUILD_TESTS=ON ..
     - cmake --build .
-  artifacts:
-    paths:
-      - build/
-  cache:
-    paths:
-      - build/
-
-run-tests:
-  stage: test
-  image: gcc:latest
-  dependencies:
-    - build-tests
-  script:
-    - cd build
     - cmake --build . --target run_tests
