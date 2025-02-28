@@ -40,4 +40,5 @@ cpp-test-job:
   dependencies:
     - build-job
   script:
-    - echo "Running c++ unit tests..."
+    - cd test
+    - for f in *.cpp; pwd

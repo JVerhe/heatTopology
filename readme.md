@@ -15,6 +15,9 @@ The Eigen c++ library for linear algebra from [link](https://eigen.tuxfamily.org
 The CMake software build system from [link](https://cmake.org/)
 `sudo apt-get install cmake`
 
+The Boost testing framework
+`sudo apt install libboost-all-dev`
+
 For compiling the first time:
 
 1. `cd build`
