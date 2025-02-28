@@ -35,7 +35,8 @@ Requirements: The Boost testing framework
 All the tests should be place in the /test directory
 
 Compiling and running tests:
-`cd build`
-`cmake -DBUILD_TESTS=ON ..` (can be set to off when you don't want to compile the tests)
-`cmake --build .`
-`cmake --build . --target run_tests`
+
+1. `cd build`
+2. `cmake -DBUILD_TESTS=ON ..` (can be set to off when you don't want to compile the tests)
+3. `cmake --build .`
+4. `cmake --build . --target run_tests`
