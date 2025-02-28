@@ -34,11 +34,24 @@ build-job:
     paths:
       - build/
 
-cpp-test-job:
+build-tests:
   stage: test
   image: gcc:latest
   dependencies:
     - build-job
   script:
-    - cd test
-    - for f in *.cpp; do pwd; done
+    - cd build
+    - cmake -DBUILD_TESTS=ON ..
+    - cmake --build .
+  cache:
+    paths:
+      - build/
+
+run-tests:
+  stage: test
+  image: gcc:latest
+  dependencies:
+    - build-job
+  script:
+    - cd build
+    - cmake --build . --target run_tests

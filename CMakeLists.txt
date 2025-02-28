@@ -17,7 +17,7 @@ add_custom_target(clean_logs
     COMMENT "Deleting all log files in ${LOG_DIR}"
 )
 
-# This flag can be set on or off
+# This flag can be set on or off, by default it is off
 option(BUILD_TESTS "Build test executables" OFF)
 
 if(BUILD_TESTS)

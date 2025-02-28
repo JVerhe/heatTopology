@@ -28,7 +28,7 @@ Compilation flags can be changed in CMakeLists.txt
 Requirements: The Boost testing framework
 `sudo apt install libboost-all-dev`
 
-All the tests should be place in the `/test` directory
+All the tests should be placed in the `/test` directory
 
 Compiling and running tests:
 
