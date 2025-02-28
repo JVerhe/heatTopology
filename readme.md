@@ -23,10 +23,6 @@ For compiling the first time:
 
 Compilation flags can be changed in CMakeLists.txt
 
-- Deleting all the log files can be done by running the command:
-
-`cmake --build . --target clean_logs`
-
 ## Running tests
 
 Requirements: The Boost testing framework
@@ -40,3 +36,9 @@ Compiling and running tests:
 2. `cmake -DBUILD_TESTS=ON ..` (can be set to `OFF` when you don't want to compile the tests)
 3. `cmake --build .`
 4. `cmake --build . --target run_tests`
+
+## Deleting log files
+
+- Deleting all the log files can be done by running the command:
+
+`cmake --build . --target clean_logs`
