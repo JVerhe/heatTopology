@@ -15,6 +15,7 @@ import sys
 
 number_of_points = 20
 L = 0.01 
+
 p = 3
 T_k =  293
 local_matrix = [[2/3,-1/6,-1/3,-1/6],[-1/6,2/3,-1/6,-1/3],[-1/3,-1/6,2/3,-1/6],[-1/6,-1/3,-1/6,2/3]]
@@ -35,7 +36,7 @@ x = optimize(
     rectangles=rectangles,
     L=L,
     boundary_temp=T_k,
-    ft=0,
+    ft=2,
 )
 
 f = open("results.txt", "w")
@@ -44,4 +45,12 @@ for value in x:
     solution += str(value) + " "
 f.write(solution)
 f.close()
+print(x)
+for e in x: assert(e<=1)
 
+
+X_matrix = np.array(x).reshape((number_of_points-1, number_of_points-1))   
+X_matrix = transform_matrix(X_matrix)  
+plt.imshow(X_matrix, cmap='gray_r', interpolation='nearest')
+plt.colorbar()
+plt.show()
