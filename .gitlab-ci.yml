@@ -41,4 +41,4 @@ cpp-test-job:
     - build-job
   script:
     - cd test
-    - for f in *.cpp; pwd
+    - for f in *.cpp; do pwd; done
