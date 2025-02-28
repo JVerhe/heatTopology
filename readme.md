@@ -9,10 +9,10 @@
 
 Requirements:
 
-The Eigen c++ library for linear algebra from: [text](https://eigen.tuxfamily.org)
+The Eigen c++ library for linear algebra from [link](https://eigen.tuxfamily.org)
 `sudo apt-get install libeigen3-dev`
 
-The CMake software build system from: [text](https://cmake.org/)
+The CMake software build system from [link](https://cmake.org/)
 `sudo apt-get install cmake`
 
 For compiling the first time:
