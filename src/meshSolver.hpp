@@ -7,25 +7,6 @@
 using namespace std;
 using namespace Eigen;
 
-void createSparseMatrix(int nx, int ny, const vector<int>& iH, const vector<int>& jH, const vector<double>& sH, SparseMatrix<double>& H, VectorXd& Hs) {
-    int N = nx * ny;
-    vector<Triplet<double>> tripletList;
-
-    for (size_t k = 0; k < sH.size(); ++k) {
-        tripletList.emplace_back(iH[k], jH[k], sH[k]);
-    }
-
-    H.resize(N, N);
-    H.setFromTriplets(tripletList.begin(), tripletList.end());
-
-    // Compute sum of each row
-    Hs = VectorXd::Zero(N);
-    for (int k = 0; k < H.outerSize(); ++k) {
-        for (SparseMatrix<double>::InnerIterator it(H, k); it; ++it) {
-            Hs(it.row()) += it.value();
-        }
-    }
-}
 
 Eigen::SparseMatrix<double> find_K(
     const Eigen::VectorXd& v,
