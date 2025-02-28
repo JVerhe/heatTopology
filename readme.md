@@ -15,9 +15,6 @@ The Eigen c++ library for linear algebra from [link](https://eigen.tuxfamily.org
 The CMake software build system from [link](https://cmake.org/)
 `sudo apt-get install cmake`
 
-The Boost testing framework
-`sudo apt install libboost-all-dev`
-
 For compiling the first time:
 
 1. `cd build`
@@ -29,3 +26,16 @@ Compilation flags can be changed in CMakeLists.txt
 - Deleting all the log files can be done by running the command:
 
 `cmake --build . --target clean_logs`
+
+## Running tests
+
+Requirements: The Boost testing framework
+`sudo apt install libboost-all-dev`
+
+All the tests should be place in the /test directory
+
+Compiling and running tests:
+`cd build`
+`cmake -DBUILD_TESTS=ON ..` (can be set to off when you don't want to compile the tests)
+`cmake --build .`
+`cmake --build . --target run_tests`
