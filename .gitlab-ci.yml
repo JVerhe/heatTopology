@@ -48,6 +48,9 @@ build-tests:
   artifacts:
     paths:
       - build/
+  cache:
+    paths:
+      - build/
 
 run-tests:
   stage: test
