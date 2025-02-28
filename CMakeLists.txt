@@ -22,6 +22,7 @@ option(BUILD_TESTS "Build test executables" OFF)
 
 if(BUILD_TESTS)
     set(TEST_DIR "${CMAKE_SOURCE_DIR}/test")
+    include_directories(test/)
     file(GLOB TEST_SOURCES "${TEST_DIR}/*.cpp")
 
     # List to store test executables
@@ -36,7 +37,7 @@ if(BUILD_TESTS)
 
     add_custom_target(run_tests
         ${TEST_EXECUTABLES}
-        COMMENT "Executing all compiled test cases."
+        COMMENT "Executing all compiled test cases." 
         DEPENDS ${TEST_EXECUTABLES}  # Ensure tests are built before running
     )
 endif()
