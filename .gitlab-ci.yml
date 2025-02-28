@@ -20,12 +20,14 @@ stages: # List of stages for jobs, and their order of execution
   - build
   - test
 
+before_script:
+  - apt-get update && apt-get install cmake -y
+  - apt-get install libeigen3-dev -y
+
 build-job:
   stage: build
   image: gcc:latest
-  before_script:
-    - apt-get update && apt-get install cmake -y
-    - apt-get install libeigen3-dev -y
+
   script:
     - cd build
     - cmake ..
@@ -37,25 +39,19 @@ build-job:
 build-tests:
   stage: test
   image: gcc:latest
-  before_script:
-    - apt-get update && apt-get install cmake -y
-    - apt-get install libeigen3-dev -y
   dependencies:
     - build-job
   script:
     - cd build
     - cmake -DBUILD_TESTS=ON ..
     - cmake --build .
-  cache:
+  artifacts:
     paths:
       - build/
 
 run-tests:
   stage: test
   image: gcc:latest
-  before_script:
-    - apt-get update && apt-get install cmake -y
-    - apt-get install libeigen3-dev -y
   dependencies:
     - build-tests
   script:
