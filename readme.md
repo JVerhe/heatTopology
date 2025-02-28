@@ -32,11 +32,11 @@ Compilation flags can be changed in CMakeLists.txt
 Requirements: The Boost testing framework
 `sudo apt install libboost-all-dev`
 
-All the tests should be place in the /test directory
+All the tests should be place in the `/test` directory
 
 Compiling and running tests:
 
 1. `cd build`
-2. `cmake -DBUILD_TESTS=ON ..` (can be set to off when you don't want to compile the tests)
+2. `cmake -DBUILD_TESTS=ON ..` (can be set to `OFF` when you don't want to compile the tests)
 3. `cmake --build .`
 4. `cmake --build . --target run_tests`
