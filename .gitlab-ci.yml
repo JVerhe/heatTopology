@@ -37,6 +37,9 @@ build-job:
 build-tests:
   stage: test
   image: gcc:latest
+  before_script:
+    - apt-get update && apt-get install cmake -y
+    - apt-get install libeigen3-dev -y
   dependencies:
     - build-job
   script:
