@@ -123,7 +123,7 @@ void sparse_H_setup(
     }
 }
 
-void createSparseMatrix(
+void create_sparse_matrix(
     const int nx, const int ny, 
     const float rmin, 
     SparseMatrix<double>& H, 
@@ -169,24 +169,17 @@ void update_densities(
     const VectorXd& B,
     const float move
 ){
-    for (size_t i = 0; i < x.size(); ++i) {
-        double x_val = x[i];
-        double B_val = B[i];
-
-        double max_x_move = std::max(x_val - move, 0.0);
-        double min_x_move = std::min(x_val + move, 1.0);
-        double x_times_B = x_val * B_val;
-
-        if (max_x_move > x_times_B) {
-            xnew[i] = std::max(max_x_move, 0.0);
+    VectorXd Bx = B.array() * x.array();
+    for (int e = 0; e < x.size(); ++e) {
+        if (Bx[e] <= std::max(0.0, x[e] - move)) {
+            xnew[e] = std::max(0.0, x[e] - move);
         }
-        else if (min_x_move < x_times_B) {
-            xnew[i] = std::min(min_x_move, 1.0);
+        else if (Bx[e] >= std::min(1.0, x[e] + move)) {
+            xnew[e] = std::min(1.0, x[e] + move);
         }
         else {
-            xnew[i] = x_times_B;
+            xnew[e] = Bx[e];
         }
-        xnew[i] = std::max(xnew[i], 0.0);
     }
 }
 

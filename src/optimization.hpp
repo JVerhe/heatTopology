@@ -34,8 +34,8 @@ Eigen::VectorXd optimize(
     const std::vector<std::vector<int>>& rectangles, 
     double L,
     double boundary_temp, 
-    int ft) {
-
+    int ft 
+){
     double E_min = 0.2;
     double E_0 = 65;
     double rmin = 0.04 * nx;
@@ -46,7 +46,7 @@ Eigen::VectorXd optimize(
 
     SparseMatrix<double> H;
     VectorXd Hs; //sum of rows of H
-    if (ft!=0) createSparseMatrix(nx, ny, rmin, H, Hs);
+    if (ft!=0) create_sparse_matrix(nx, ny, rmin, H, Hs);
 
 
     VectorXd x = VectorXd::Constant(nx * ny, max_vol_frac);

@@ -19,7 +19,7 @@ int main() {
 
 
     std::vector<std::vector<int>> rectangles = create_rectangle_and_mesh(number_of_points);
-    int ft = 0;
+    int ft = 1;
     Eigen::VectorXd x = optimize(local_matrix, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
 
     save_result_to_file(x, "output/final.txt");
