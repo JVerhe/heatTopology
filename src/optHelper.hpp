@@ -6,7 +6,7 @@
 #include <map>
 #include <cmath>
 
-
+using namespace Eigen;
 
 Eigen::VectorXd fill_in_k(const Eigen::VectorXd& v, double k_max, double k_min, double p) {
     /**
@@ -100,4 +100,142 @@ Eigen::VectorXd adjoint(const Eigen::VectorXd& T, const Eigen::VectorXd& v,
 
     return gradJv;
 }
+void sparse_H_setup(
+    const int nx,const int ny, 
+    const float rmin, 
+    std::vector<int>& iH, 
+    std::vector<int>& jH, 
+    std::vector<double>& sH
+){
+    for (int i1 = 0; i1 < nx; ++i1) {
+        for (int j1 = 0; j1 < ny; ++j1) {
+            int e1 = i1 * ny + j1;
+            for (int i2 = std::max(i1 - static_cast<int>(std::ceil(rmin)) + 1, 0); i2 < std::min(i1 + static_cast<int>(std::ceil(rmin)), nx); ++i2) {
+                for (int j2 = std::max(j1 - static_cast<int>(std::ceil(rmin)) + 1, 0); j2 < std::min(j1 + static_cast<int>(std::ceil(rmin)), ny); ++j2) {
+                    int e2 = i2 * ny + j2;
+                    double weight = std::max(0.0, rmin - std::sqrt((i1 - i2) * (i1 - i2) + (j1 - j2) * (j1 - j2)));
+                    iH.push_back(e1);
+                    jH.push_back(e2);
+                    sH.push_back(weight);
+                }
+            }
+        }
+    }
+}
+
+void create_sparse_matrix(
+    const int nx, const int ny, 
+    const float rmin, 
+    SparseMatrix<double>& H, 
+    VectorXd& Hs
+){
+    vector<int> iH,jH; 
+    vector<double> sH;
+    sparse_H_setup(nx,ny,rmin,iH,jH,sH);
+
+    int N = nx * ny;
+    vector<Triplet<double>> tripletList;
+
+    for (size_t k = 0; k < sH.size(); ++k) {
+        tripletList.emplace_back(iH[k], jH[k], sH[k]);
+    }
+
+    H.resize(N, N);
+    H.setFromTriplets(tripletList.begin(), tripletList.end());
+
+    // Compute sum of each row
+    Hs = VectorXd::Zero(N);
+    for (int k = 0; k < H.outerSize(); ++k) {
+        for (SparseMatrix<double>::InnerIterator it(H, k); it; ++it) {
+            Hs(it.row()) += it.value();
+        }
+    }
+}
+
+void solve_sparse_lin_sys(const SparseMatrix<double>& K, const VectorXd& F, VectorXd& U){
+    ConjugateGradient<SparseMatrix<double>, Lower | Upper> solver;
+
+    solver.compute(K);
+    solver.setMaxIterations(1000);
+    solver.setTolerance(1e-4);
+
+    U = solver.solve(F);
+}
+
+
+void update_densities(
+    const VectorXd& x,
+    VectorXd& xnew,
+    const VectorXd& B,
+    const float move
+){
+    VectorXd Bx = B.array() * x.array();
+    for (int e = 0; e < x.size(); ++e) {
+        if (Bx[e] <= std::max(0.0, x[e] - move)) {
+            xnew[e] = std::max(0.0, x[e] - move);
+        }
+        else if (Bx[e] >= std::min(1.0, x[e] + move)) {
+            xnew[e] = std::min(1.0, x[e] + move);
+        }
+        else {
+            xnew[e] = Bx[e];
+        }
+    }
+}
+
+
+void find_new_densities(
+    const int nx, const int ny,
+    const VectorXd& x,
+    VectorXd& xPhys,
+    VectorXd& xnew,
+    const VectorXd& dc,
+    const VectorXd& dv,
+    const SparseMatrix<double>& H, 
+    const VectorXd& Hs,
+    const int ft,
+    const float max_vol_frac
+){
+    double l1 = 0;
+    double l2 = 1e9;
+    double move = 0.4;
+    while ((l2 - l1) / (l2 + l1) > 0.001) {
+
+        double lmid = 0.5 * (l1 + l2);
+        VectorXd B = (-dc.array() / (dv.array() * lmid)).max(0).sqrt();
+        VectorXd Bx = B.array() * x.array();
+
+        //update_x
+        xnew = Eigen::VectorXd::Zero(x.size());
+        for (int e = 0; e < x.size(); ++e) {
+            if (Bx[e] <= std::max(0.0, x[e] - move)) {
+                xnew[e] = std::max(0.0, x[e] - move);
+            }
+            else if (Bx[e] >= std::min(1.0, x[e] + move)) {
+                xnew[e] = std::min(1.0, x[e] + move);
+            }
+            else {
+                xnew[e] = Bx[e];
+            }
+        }
+
+        update_densities(x,xnew,B,move);
+
+        if (ft == 0 || ft == 1) {
+            xPhys = xnew;
+        }
+        else if (ft == 2) {
+            xPhys = H * xnew;
+            xPhys = xPhys.cwiseQuotient(Hs);
+        }
+
+        if (xPhys.sum() > max_vol_frac * nx * nx) {
+            l1 = lmid;
+        }
+        else {
+            l2 = lmid;
+        }
+    }
+}
 #endif
+
