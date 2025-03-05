@@ -7,12 +7,15 @@ files = os.listdir("output/")
 for file in files:
     if not file.endswith(".txt"):
         files.remove(file)
-files.insert(0, files.pop(files.index("final.txt")))
+files.insert(0, files.pop(files.index("results.txt")))
+
+print("\n\n")
+print("Choose which file to plot. (Press ctrl+C to exit)")
+
+for idx, file in enumerate(files):
+    print(f"\t[{idx}]\t{file}")
 
 while(True):
-    print("Choose which file to plot.")
-    for idx, file in enumerate(files):
-        print(f"\t[{idx}]\t{file}")
 
     target = int(input())
     target_file = files[target]

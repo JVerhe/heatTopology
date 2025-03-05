@@ -35,6 +35,10 @@ void signalHandler(int signal) {
 
 int main(int argc, char* argv[]) {
 
+    if (argc == 1) {
+        std::cerr << "Append the name of a config file when executing main." << std::endl;
+    }
+
     int number_of_points; int p; int ft;
 
     std::signal(SIGSEGV, signalHandler);
@@ -61,5 +65,7 @@ int main(int argc, char* argv[]) {
     char outputfile[100] = "output/results.txt";
     save_result_to_file(x, outputfile);
 
+    std::string callPython = "python3 plot_result.py";
+    int rc = system(callPython.c_str());
     return 0;
 }

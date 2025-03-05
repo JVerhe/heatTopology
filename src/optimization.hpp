@@ -122,7 +122,7 @@ Eigen::VectorXd optimize(
         std::cout << "It.: " << loop << " Obj.: " << c << " Vol.: " << x_phys.mean() << " ch.: " << change << std::endl;
         if (loop % 20 == 0) {
             char filename[100];
-            sprintf(filename, "output/result_p%.1f_itteration%d.txt", penal, loop);
+            sprintf(filename, "output/result_p%.1f_iteration%d.txt", penal, loop);
             save_result_to_file(x, filename);
         }
     }
