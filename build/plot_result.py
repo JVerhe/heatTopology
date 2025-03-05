@@ -4,9 +4,16 @@ import matplotlib.pyplot as plt
 import os
 
 files = os.listdir("output/")
+
+if len(files) == 1:
+    print("No files in the output folder")
+    exit()
+
 for file in files:
     if not file.endswith(".txt"):
         files.remove(file)
+
+files.sort()
 files.insert(0, files.pop(files.index("results.txt")))
 
 print("\n\n")

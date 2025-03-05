@@ -36,7 +36,8 @@ void signalHandler(int signal) {
 int main(int argc, char* argv[]) {
 
     if (argc == 1) {
-        std::cerr << "Append the name of a config file when executing main." << std::endl;
+        std::cerr << "Append the name of a config file when executing main" << std::endl;
+        return 1;
     }
 
     int number_of_points; int p; int ft;
