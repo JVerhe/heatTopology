@@ -34,6 +34,16 @@ Compilation flags can be changed in CMakeLists.txt
 3. `cmake --build .`
 4. `cmake --build . --target run_tests` (everytime you want to compile the tests)
 
+## Plotting the Results
+
+For plotting the results of the script, some Python packages are required. These can be installed from the main repository via the following command:
+
+`pip install -r requirements.txt`
+
+After executing the main program it is possible to visualize the results from inside the build directory via the `plot_results.py` script.
+
+`python3 plot_results.py`
+
 ## Deleting log files
 
 - Deleting all the log files in `/build/output` can be done inside the build directory by running the command:
