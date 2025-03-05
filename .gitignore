@@ -1,7 +1,3 @@
 **/.vscode
 **/__pycache__/
 *.pyc
-
-test/*
-!test/*.cpp
-!test/*.hpp

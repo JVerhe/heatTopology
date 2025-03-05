@@ -14,8 +14,8 @@ using namespace Eigen;
 /**
  * @brief Saves a given Eigen vector to a file.
  *
- * This function writes the contents of the vector `U` to a text file, 
- * storing one element per line. If the file cannot be opened, 
+ * This function writes the contents of the vector `U` to a text file,
+ * storing one element per line. If the file cannot be opened,
  * an error message is printed to standard error.
  *
  * @param U The Eigen vector to be saved.
@@ -38,34 +38,34 @@ void save_result_to_file(const Eigen::VectorXd& U, const std::string& filename) 
 
 /**
  * @brief Performs a heuristic algorithm for heat topology optimization.
- * 
- * This function heuristically optimizes the distribution of metal on a FEM-discretized plate. 
- * It ensures elements to be either fully metal or fully plastic via the SIMP method. 
- * Inspiration for this code is taken from:  
- * Andreassen, E., Clausen, A., Schevenels, M., Lazarov, B. S., & Sigmund, O. (2011). 
- * Efficient topology optimization in MATLAB using 88 lines of code. 
+ *
+ * This function heuristically optimizes the distribution of metal on a FEM-discretized plate.
+ * It ensures elements to be either fully metal or fully plastic via the SIMP method.
+ * Inspiration for this code is taken from:
+ * Andreassen, E., Clausen, A., Schevenels, M., Lazarov, B. S., & Sigmund, O. (2011).
+ * Efficient topology optimization in MATLAB using 88 lines of code.
  * Structural and Multidisciplinary Optimization, 43, 1-16.
- * 
+ *
  * @param K0 The constant part of the local conductivity matrix.
  * @param max_vol_frac The maximum amount of volume percentage of metal on the plate.
- * @param nx The amount of elements in x-direction. 
- * @param ny The amount of elements in y-direction. 
- * @param penal The penalization factor in the SIMP method. 
- * @param rectangles The numbering of neighbouring grid points for each element. 
- * @param L The side length of the plate. 
+ * @param nx The amount of elements in x-direction.
+ * @param ny The amount of elements in y-direction.
+ * @param penal The penalization factor in the SIMP method.
+ * @param rectangles The numbering of neighbouring grid points for each element.
+ * @param L The side length of the plate.
  * @param boundary_temp The fixed temperature at the outlets.
- * @param ft The filtering option: 0=no filtering, 1=sensitivity filtering, 2=density filtering. 
+ * @param ft The filtering option: 0=no filtering, 1=sensitivity filtering, 2=density filtering.
  */
 Eigen::VectorXd optimize(
-    const Eigen::MatrixXd& K0, 
+    const Eigen::MatrixXd& K0,
     double max_vol_frac,
-    int nx, int ny, 
-    double penal, 
-    const std::vector<std::vector<int>>& rectangles, 
+    int nx, int ny,
+    double penal,
+    const std::vector<std::vector<int>>& rectangles,
     double L,
-    double boundary_temp, 
-    int ft 
-){
+    double boundary_temp,
+    int ft
+) {
     double E_min = 0.2;
     double E_0 = 65;
     double rmin = 0.04 * nx;
@@ -76,12 +76,11 @@ Eigen::VectorXd optimize(
 
     SparseMatrix<double> H;
     VectorXd Hs; //sum of rows of H
-    if (ft!=0) create_sparse_matrix(nx, ny, rmin, H, Hs);
+    if (ft != 0) create_sparse_matrix(nx, ny, rmin, H, Hs);
 
 
     VectorXd x = VectorXd::Constant(nx * ny, max_vol_frac);
     VectorXd x_phys = x;
-    VectorXd x_sol = x;
 
     double curr_obj = 1e6;
     int loop = 0;
@@ -99,7 +98,7 @@ Eigen::VectorXd optimize(
         K = result.first;
         F = result.second;
         VectorXd U = VectorXd::Zero(F.size());
-        solve_sparse_lin_sys(K,F,U);
+        solve_sparse_lin_sys(K, F, U);
 
         double c = objective(x_phys, rectangles, U, K0, 0.2, 65, penal);
         Eigen::VectorXd dc = adjoint(U, x_phys, rectangles, K0, penal);
@@ -115,23 +114,18 @@ Eigen::VectorXd optimize(
         }
         Eigen::VectorXd xnew = Eigen::VectorXd::Zero(x.size());
 
-        find_new_densities(nx,ny,x,x_phys,xnew,dc,dv,H,Hs,ft,max_vol_frac);
+        find_new_densities(nx, ny, x, x_phys, xnew, dc, dv, H, Hs, ft, max_vol_frac);
 
         change = (xnew - x).cwiseAbs().maxCoeff();
         x = xnew;
 
-        if (c < curr_obj){ //save solution if it is the best one yet
-            curr_obj = c;
-            x_sol = x;
-        }
-
         std::cout << "It.: " << loop << " Obj.: " << c << " Vol.: " << x_phys.mean() << " ch.: " << change << std::endl;
         if (loop % 20 == 0) {
             char filename[100];
-            sprintf(filename, "output/result_p%d_itteration%d.txt", penal, loop);
+            sprintf(filename, "output/result_p%.1f_itteration%d.txt", penal, loop);
             save_result_to_file(x, filename);
         }
     }
-    return x_sol;
+    return x;
 }
 #endif
