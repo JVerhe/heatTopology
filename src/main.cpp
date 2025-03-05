@@ -10,7 +10,7 @@ void readConfig(const std::string& filename, int& number_of_points, int& p, int&
     file.close();
 }
 
-void writeOutput(const std::string& filename, Eigen::VectorXd x){
+void writeOutput(const std::string& filename, Eigen::VectorXd x) {
     std::ofstream file(filename);
     if (file.is_open()) {
         for (int i = 0; i < x.size(); ++i) {
@@ -26,13 +26,12 @@ void writeOutput(const std::string& filename, Eigen::VectorXd x){
 
 }
 
-
 int main() {
 
     int number_of_points; int p; int ft;
-    char config_file[100] = "../Config_files/config.txt";
+    char config_file[100] = "config/config.txt";
 
-    readConfig(config_file,number_of_points,p,ft);
+    readConfig(config_file, number_of_points, p, ft);
 
     double  L = 0.01;
     double T_k = 293;
@@ -49,7 +48,7 @@ int main() {
     Eigen::VectorXd x = optimize(local_matrix, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
 
 
-    char outputfile[100] = "../Results/results.txt";
+    char outputfile[100] = "output/results.txt";
     save_result_to_file(x, outputfile);
 
     return 0;
