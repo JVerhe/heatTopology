@@ -8,17 +8,16 @@
 
 using namespace Eigen;
 
+/**
+ * Computes the material property values (k) based on the density vector (v).
+ *
+ * @param v Vector of densities (values between 0 and 1).
+ * @param k_max Maximum stiffness value.
+ * @param k_min Minimum stiffness value.
+ * @param p Penalization factor.
+ * @return Eigen::VectorXd containing computed k values.
+*/
 Eigen::VectorXd fill_in_k(const Eigen::VectorXd& v, double k_max, double k_min, double p) {
-    /**
-     * Computes the material property values (k) based on the density vector (v).
-     *
-     * @param v: Vector of densities (values between 0 and 1).
-     * @param k_max: Maximum stiffness value.
-     * @param k_min: Minimum stiffness value.
-     * @param p: Penalization factor.
-     * @return Eigen::VectorXd containing computed k values.
-     */
-
     Eigen::VectorXd k(v.size());
 
     for (int i = 0; i < v.size(); ++i) {
@@ -28,22 +27,21 @@ Eigen::VectorXd fill_in_k(const Eigen::VectorXd& v, double k_max, double k_min, 
     return k;
 }
 
-
+/**
+* @brief Computes the objective function value for a given material distribution.
+*
+* @param v Density vector (values between 0 and 1).
+* @param rectangles List of elements, each defined by 4 node indices.
+* @param T Temperature values at each node.
+* @param K0 Base stiffness matrix (4x4) stored as a sparse matrix.
+* @param k_min Minimum stiffness value.
+* @param k_max Maximum stiffness value.
+* @param p Penalization factor.
+* @return Computed objective function value.
+*/
 double objective(const Eigen::VectorXd& v, const std::vector<std::vector<int>>& rectangles,
     const Eigen::VectorXd& T, const Eigen::Matrix4d& K0,
     double k_min, double k_max, double p) {
-    /**
-    * Computes the objective function value for a given material distribution.
-    *
-    * @param v: Density vector (values between 0 and 1).
-    * @param rectangles: List of elements, each defined by 4 node indices.
-    * @param T: Temperature values at each node.
-    * @param K0: Base stiffness matrix (4x4) stored as a sparse matrix.
-    * @param k_min: Minimum stiffness value.
-    * @param k_max: Maximum stiffness value.
-    * @param p: Penalization factor.
-    * @return Computed objective function value.
-    */
 
     double D = 0.0;
     Eigen::VectorXd k_values = fill_in_k(v, k_max, k_min, p);
@@ -67,20 +65,20 @@ double objective(const Eigen::VectorXd& v, const std::vector<std::vector<int>>& 
     return D;
 }
 
-
+/**
+* Compute the derivative of the cost function with respect to the fraction of metal for each element.
+*
+* @param T: The global temperature vector.
+* @param v: The global vector with fractions of metal in each element.
+* @param corners: A nested list with first index as elements and second index as the nodes of each element.
+* @param K0: The local stiffness matrix (4x4).
+* @param p: Penalization factor that pushes fractions of metal towards 0 or 1 (p > 1).
+* @return gradJv: A column vector of size(n) containing the derivative of the cost function.
+*/
 Eigen::VectorXd adjoint(const Eigen::VectorXd& T, const Eigen::VectorXd& v,
     const std::vector<std::vector<int>>& corners,
     const Eigen::MatrixXd& K0, double p = 3) {
-    /**
-    * Compute the derivative of the cost function with respect to the fraction of metal for each element.
-    *
-    * @param T: The global temperature vector.
-    * @param v: The global vector with fractions of metal in each element.
-    * @param corners: A nested list with first index as elements and second index as the nodes of each element.
-    * @param K0: The local stiffness matrix (4x4).
-    * @param p: Penalization factor that pushes fractions of metal towards 0 or 1 (p > 1).
-    * @return gradJv: A column vector of size(n) containing the derivative of the cost function.
-    */
+    
 
     int elements = v.size();
     Eigen::VectorXd gradJv(elements);
@@ -100,6 +98,19 @@ Eigen::VectorXd adjoint(const Eigen::VectorXd& T, const Eigen::VectorXd& v,
 
     return gradJv;
 }
+
+/**
+ * @brief Sets up a sparse matrix H for filtering. 
+ * 
+ * @param nx number of elements in x-direction. 
+ * @param ny number of elements in y-direction. 
+ * @param rmin radius parameter for filtering. 
+ * @param iH row-indices for sparse matrix setup. 
+ * @param jH column-indices for sparse matrix setup. 
+ * @param sH element values for sparse matrix setup. 
+ * 
+ * @return void
+ */
 void sparse_H_setup(
     const int nx,const int ny, 
     const float rmin, 
@@ -123,6 +134,17 @@ void sparse_H_setup(
     }
 }
 
+/**
+ * @brief Creates sparse matrix H and its row sum Hs. 
+ * 
+ * @param nx number of elements in x-direction. 
+ * @param ny number of elements in y-direction. 
+ * @param rmin radius parameter for filtering. 
+ * @param H sparse matrix H. 
+ * @param Hs row sum of H. 
+ * 
+ * @return void
+ */
 void create_sparse_matrix(
     const int nx, const int ny, 
     const float rmin, 
@@ -152,6 +174,13 @@ void create_sparse_matrix(
     }
 }
 
+/**
+ * @brief Solves sparse linear system KU=F iteratively, not exactly.
+ * 
+ * @param K KU=F
+ * @param F KU=F
+ * @param U KU=F
+ */
 void solve_sparse_lin_sys(const SparseMatrix<double>& K, const VectorXd& F, VectorXd& U){
     ConjugateGradient<SparseMatrix<double>, Lower | Upper> solver;
 
@@ -162,7 +191,16 @@ void solve_sparse_lin_sys(const SparseMatrix<double>& K, const VectorXd& F, Vect
     U = solver.solve(F);
 }
 
-
+/** 
+ * @brief Updates densities according to heuristic optimization scheme as implemented in the reference paper. 
+ * 
+ * @param x Old densities. 
+ * @param xnew New densities. 
+ * @param B Vector needed for updating scheme. 
+ * @param move Maximum change per iteration per element.
+ * 
+ * @return void 
+ */
 void update_densities(
     const VectorXd& x,
     VectorXd& xnew,
@@ -183,7 +221,24 @@ void update_densities(
     }
 }
 
-
+/**
+ * @brief Finds the new density vector after one iteration of heuristic optimization scheme. 
+ * A bisection algorithm is implemented in order to find the lagrange multiplier needed for updating the density vector.
+ * 
+ * @param nx number of elements in x-direction. 
+ * @param ny number of elements in y-direction.
+ * @param x vector containing old densities. 
+ * @param xPhys vector containing densities after filtering. 
+ * @param xnew vector for saving new densities. 
+ * @param dc vector containing the objective function derivative for each element. 
+ * @param dv vector containing the derivative of material volume w.r.t. the metal fraction in each element. 
+ * @param H filter matrix. 
+ * @param Hs row sum of H. 
+ * @param ft filtering option: 0=no filtering, 1=sensitivity filtering, 2=density filtering. 
+ * @param max_vol_frac Maximum volume percentage of metal in the plate. 
+ * 
+ * @return void
+ */
 void find_new_densities(
     const int nx, const int ny,
     const VectorXd& x,
@@ -198,7 +253,7 @@ void find_new_densities(
 ){
     double l1 = 0;
     double l2 = 1e9;
-    double move = 0.4;
+    double move = 0.3;
     while ((l2 - l1) / (l2 + l1) > 0.001) {
 
         double lmid = 0.5 * (l1 + l2);

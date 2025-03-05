@@ -160,7 +160,7 @@ def load_result_from_file(filename):
         U = np.array([float(line.strip()) for line in lines])
     return U
 
-
+"""
 U_loaded = load_result_from_file("result.txt")
 
 
@@ -191,3 +191,4 @@ plt.title("Distribution de la température")
 plt.xlabel("x (m)")
 plt.ylabel("y (m)")
 plt.show()
+"""
