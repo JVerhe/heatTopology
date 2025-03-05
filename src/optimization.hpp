@@ -81,7 +81,6 @@ Eigen::VectorXd optimize(
 
     VectorXd x = VectorXd::Constant(nx * ny, max_vol_frac);
     VectorXd x_phys = x;
-    VectorXd x_sol = x;
 
     double curr_obj = 1e6;
     int loop = 0;
@@ -120,11 +119,6 @@ Eigen::VectorXd optimize(
         change = (xnew - x).cwiseAbs().maxCoeff();
         x = xnew;
 
-        if (c < curr_obj) { //save solution if it is the best one yet
-            curr_obj = c;
-            x_sol = x;
-        }
-
         std::cout << "It.: " << loop << " Obj.: " << c << " Vol.: " << x_phys.mean() << " ch.: " << change << std::endl;
         if (loop % 20 == 0) {
             char filename[100];
@@ -132,6 +126,6 @@ Eigen::VectorXd optimize(
             save_result_to_file(x, filename);
         }
     }
-    return x_sol;
+    return x;
 }
 #endif
