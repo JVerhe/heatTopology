@@ -1,14 +1,14 @@
 ## Requirements
 
-The Eigen c++ library for linear algebra from [link](https://eigen.tuxfamily.org)\
+The Eigen c++ library for linear algebra from [link](https://eigen.tuxfamily.org)
 
 `sudo apt-get install libeigen3-dev`
 
-The CMake software build system from [link](https://cmake.org/)\
+The CMake software build system from [link](https://cmake.org/)
 
 `sudo apt-get install cmake`
 
-For plotting the results of the script, some Python packages are required. These can be installed from the main repository via the following command:\
+For plotting the results of the script, some Python packages are required. These can be installed from the main repository via the following command:
 
 `pip install -r requirements.txt`
 
