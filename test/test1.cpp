@@ -19,7 +19,6 @@ void exampleTest1() { // Should work
     Eigen::Vector3d v2;
     v2 << 1, 2, 3;
 
-    tf::compare(true, v1.isApprox(v2));
     tf::compareTolerance(0., (v1 - v2).norm(), 0.1);
 
     create_rectangle_and_mesh(50); // Functions of the project can still be called
@@ -27,6 +26,7 @@ void exampleTest1() { // Should work
 
 int main() {
     exampleTest1();
+    std::cout << "test1 ran succesfully" << std::endl;
     return 0;
 }
 

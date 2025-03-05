@@ -35,9 +35,23 @@ if(BUILD_TESTS)
     endforeach()
 
 
+    # Custom target to run all tests after building
     add_custom_target(run_tests
-        ${TEST_EXECUTABLES}
-        COMMENT "Executing all compiled test cases." 
+        COMMENT "Succesfully Ran all Tests"
         DEPENDS ${TEST_EXECUTABLES}  # Ensure tests are built before running
     )
+
+    # Loop through test executables and add a command for each
+    foreach(TEST_EXEC ${TEST_EXECUTABLES})
+        add_custom_target(run_${TEST_EXEC}
+            COMMAND ${CMAKE_BINARY_DIR}/${TEST_EXEC}
+            DEPENDS ${TEST_EXEC}
+            COMMENT "Running Test File ${TEST_EXEC}"
+        )
+        
+        # Make `run_tests` depend on each `run_<testname>` target
+        add_dependencies(run_tests run_${TEST_EXEC})
+    endforeach()
+
+
 endif()
