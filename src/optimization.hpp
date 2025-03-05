@@ -114,7 +114,7 @@ Eigen::VectorXd optimize(
         }
         Eigen::VectorXd xnew = Eigen::VectorXd::Zero(x.size());
 
-        find_new_densities(nx, ny, x, x_phys, xnew, dc, dv, H, Hs, ft, max_vol_frac);
+        find_new_densities(nx,ny,x,x_phys,xnew,dc,dv,H,Hs,ft,max_vol_frac);
 
         change = (xnew - x).cwiseAbs().maxCoeff();
         x = xnew;
@@ -126,6 +126,6 @@ Eigen::VectorXd optimize(
             save_result_to_file(x, filename);
         }
     }
-    return x;
+    return x_sol;
 }
 #endif
