@@ -34,7 +34,7 @@ Metal fraction penalty exponent (double)
 Filtering technique (0 = no filtering, 1 = sensitivity filtering, 2 = density filtering)
 ```
 
-For example a `config1.txt` could look like this:
+For example a `config.txt` could look like this:
 
 ```
 20
@@ -42,7 +42,7 @@ For example a `config1.txt` could look like this:
 2
 ```
 
-The main file can be executed by running `./main config1`
+The main file can be executed by running `./main config`
 
 ## Plotting the Results
 
