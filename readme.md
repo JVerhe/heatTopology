@@ -1,19 +1,15 @@
-## The repository has the following layout:
-
-- etc: contains files used in development for various purposes
-- proto: contains the python prototype of the project
-- src: contains the files for the C++ project
-- test: contains automatic unit tests
-
-## To compile the project:
-
-Requirements:
+## Requirements
 
 The Eigen c++ library for linear algebra from [link](https://eigen.tuxfamily.org)
 `sudo apt-get install libeigen3-dev`
 
 The CMake software build system from [link](https://cmake.org/)
 `sudo apt-get install cmake`
+
+For plotting the results of the script, some Python packages are required. These can be installed from the main repository via the following command:
+`pip install -r requirements.txt`
+
+## Compiling the project
 
 For compiling the first time:
 
@@ -24,10 +20,6 @@ For compiling the first time:
 Compilation flags can be changed in CMakeLists.txt
 
 ## Plotting the Results
-
-For plotting the results of the script, some Python packages are required. These can be installed from the main repository via the following command:
-
-`pip install -r requirements.txt`
 
 After executing the main program it is possible to visualize the results from inside the build directory via the `plot_results.py` script.
 
