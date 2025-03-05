@@ -1,4 +1,0 @@
-number_of_points    n
-penality            p
-filtering           f
-
