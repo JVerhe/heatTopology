@@ -1,5 +1,7 @@
 #include <Eigen/Sparse>
 #include <iostream>
+#include <csignal>
+#include <cstdlib>
 #include "optimization.hpp"
 #include "meshHelper.hpp"
 
@@ -26,12 +28,18 @@ void writeOutput(const std::string& filename, Eigen::VectorXd x) {
 
 }
 
-int main() {
+void signalHandler(int signal) {
+    std::cerr << "No config file with that name was found" << std::endl;
+    std::exit(signal);
+}
+
+int main(int argc, char* argv[]) {
 
     int number_of_points; int p; int ft;
-    char config_file[100] = "config/config.txt";
 
-    readConfig(config_file, number_of_points, p, ft);
+    std::signal(SIGSEGV, signalHandler);
+    std::string file_name = argv[1];
+    std::string config_file = "config/" + file_name + ".txt";
 
     double  L = 0.01;
     double T_k = 293;

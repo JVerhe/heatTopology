@@ -1,18 +1,19 @@
-## Requirements
+## The repository has the following layout:
+
+- etc: contains files used in development for various purposes
+- proto: contains the python prototype of the project
+- src: contains the files for the C++ project
+- test: contains automatic unit tests
+
+## To compile the project:
+
+Requirements:
 
 The Eigen c++ library for linear algebra from [link](https://eigen.tuxfamily.org)
-
 `sudo apt-get install libeigen3-dev`
 
 The CMake software build system from [link](https://cmake.org/)
-
 `sudo apt-get install cmake`
-
-For plotting the results of the script, some Python packages are required. These can be installed from the main repository via the following command:
-
-`pip install -r requirements.txt`
-
-## Compiling the project
 
 For compiling the first time:
 
@@ -22,17 +23,25 @@ For compiling the first time:
 
 Compilation flags can be changed in CMakeLists.txt
 
-## Plotting the Results
+## Running the main.cpp
 
-After executing the main program it is possible to visualize the results from inside the build directory via the `plot_results.py` script.
+- A config file inside the folder `/build/config/` has to be present. It should look like this.
 
-`python3 plot_results.py`
+```
+Number of Discretization points in one dimension (int)
+Metal fraction penalty exponent (double)
+Filtering technique (0 = no filtering, 1 = sensitivity filtering, 2 = density filtering)
+```
 
-## Deleting log files
+For example a `config.txt` could look like this:
 
-- Deleting all the log files in `/build/output` can be done inside the build directory by running the command:
+```
+20
+2
+2
+```
 
-`cmake --build . --target clean_logs`
+The main file can be executed by running `./main`
 
 ## Running tests
 
@@ -44,3 +53,9 @@ After executing the main program it is possible to visualize the results from in
 2. `cmake -DBUILD_TESTS=ON ..` (can be set to `OFF` when you don't want to compile the tests)
 3. `cmake --build .`
 4. `cmake --build . --target run_tests` (everytime you want to compile the tests)
+
+## Deleting log files
+
+- Deleting all the log files in `/build/output` can be done inside the build directory by running the command:
+
+`cmake --build . --target clean_logs`
