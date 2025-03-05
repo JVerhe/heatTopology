@@ -23,6 +23,12 @@ For compiling the first time:
 
 Compilation flags can be changed in CMakeLists.txt
 
+## Running the main.cpp
+
+- A config file need to be fill in the folder Config_files
+
+- The format of this config file is in format.txt
+
 ## Running tests
 
 - All the tests should be placed in the `/test` directory
