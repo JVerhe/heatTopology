@@ -11,20 +11,17 @@ using namespace Eigen;
 /**
  * Computes the material property values (k) based on the density vector (v).
  *
+ * @param k Vector of material condictivity values. 
  * @param v Vector of densities (values between 0 and 1).
  * @param k_max Maximum stiffness value.
  * @param k_min Minimum stiffness value.
  * @param p Penalization factor.
- * @return Eigen::VectorXd containing computed k values.
+ * @return void.
 */
-Eigen::VectorXd fill_in_k(const Eigen::VectorXd& v, double k_max, double k_min, double p) {
-    Eigen::VectorXd k(v.size());
-
+void fill_in_k(Eigen::VectorXd& k, const Eigen::VectorXd& v, double k_max, double k_min, double p) {  
     for (int i = 0; i < v.size(); ++i) {
         k(i) = k_min + (k_max - k_min) * std::pow(v(i), p);
     }
-
-    return k;
 }
 
 /**
@@ -44,7 +41,8 @@ double objective(const Eigen::VectorXd& v, const std::vector<std::vector<int>>& 
     double k_min, double k_max, double p) {
 
     double D = 0.0;
-    Eigen::VectorXd k_values = fill_in_k(v, k_max, k_min, p);
+    Eigen::VectorXd k_values = Eigen::VectorXd::Zero(v.size());
+    fill_in_k(k_values, v, k_max, k_min, p);
 
     for (size_t e = 0; e < rectangles.size(); ++e) {
         double k_e = k_values(e);
@@ -151,12 +149,12 @@ void create_sparse_matrix(
     SparseMatrix<double>& H, 
     VectorXd& Hs
 ){
-    vector<int> iH,jH; 
-    vector<double> sH;
+    std::vector<int> iH,jH; 
+    std::vector<double> sH;
     sparse_H_setup(nx,ny,rmin,iH,jH,sH);
 
     int N = nx * ny;
-    vector<Triplet<double>> tripletList;
+    std::vector<Triplet<double>> tripletList;
 
     for (size_t k = 0; k < sH.size(); ++k) {
         tripletList.emplace_back(iH[k], jH[k], sH[k]);
