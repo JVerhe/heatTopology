@@ -27,15 +27,15 @@ void save_result_to_file(const Eigen::VectorXd& U, const std::string& filename) 
 
 
 Eigen::VectorXd optimize(
-    const Eigen::MatrixXd& K0, 
+    const Eigen::MatrixXd& K0,
     double max_vol_frac,
-    int nx, int ny, 
-    double penal, 
-    const std::vector<std::vector<int>>& rectangles, 
+    int nx, int ny,
+    double penal,
+    const std::vector<std::vector<int>>& rectangles,
     double L,
-    double boundary_temp, 
-    int ft 
-){
+    double boundary_temp,
+    int ft
+) {
     double E_min = 0.2;
     double E_0 = 65;
     double rmin = 0.04 * nx;
@@ -46,7 +46,7 @@ Eigen::VectorXd optimize(
 
     SparseMatrix<double> H;
     VectorXd Hs; //sum of rows of H
-    if (ft!=0) create_sparse_matrix(nx, ny, rmin, H, Hs);
+    if (ft != 0) create_sparse_matrix(nx, ny, rmin, H, Hs);
 
 
     VectorXd x = VectorXd::Constant(nx * ny, max_vol_frac);
@@ -66,7 +66,7 @@ Eigen::VectorXd optimize(
         K = result.first;
         F = result.second;
         VectorXd U = VectorXd::Zero(F.size());
-        solve_sparse_lin_sys(K,F,U);
+        solve_sparse_lin_sys(K, F, U);
 
         double c = objective(xPhys, rectangles, U, K0, 0.2, 65, penal);
         Eigen::VectorXd dc = adjoint(U, xPhys, rectangles, K0, penal);
@@ -82,7 +82,7 @@ Eigen::VectorXd optimize(
         }
         Eigen::VectorXd xnew = Eigen::VectorXd::Zero(x.size());
 
-        find_new_densities(nx,ny,x,xPhys,xnew,dc,dv,H,Hs,ft,max_vol_frac);
+        find_new_densities(nx, ny, x, xPhys, xnew, dc, dv, H, Hs, ft, max_vol_frac);
 
         change = (xnew - x).cwiseAbs().maxCoeff();
         x = xnew;
@@ -90,7 +90,7 @@ Eigen::VectorXd optimize(
         std::cout << "It.: " << loop << " Obj.: " << c << " Vol.: " << xPhys.mean() << " ch.: " << change << std::endl;
         if (loop % 20 == 0) {
             char filename[100];
-            sprintf(filename, "output/result_p%d_itteration%d.txt", penal, loop);
+            sprintf(filename, "output/result_p%.1f_itteration%d.txt", penal, loop);
             save_result_to_file(x, filename);
         }
     }
