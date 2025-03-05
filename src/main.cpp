@@ -39,8 +39,10 @@ int main(int argc, char* argv[]) {
 
     std::signal(SIGSEGV, signalHandler);
     std::string file_name = argv[1];
+    std::cout << file_name << std::endl;
     std::string config_file = "config/" + file_name + ".txt";
 
+    readConfig(config_file, number_of_points, p, ft);
     double  L = 0.01;
     double T_k = 293;
     double vol_frac = 0.4;
