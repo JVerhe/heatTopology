@@ -14,7 +14,6 @@ using namespace Eigen;
 
 void test_optimization_function() 
 {
-    std::cout << "OK0" << std::endl;
     int ft = 0;
     Eigen::Matrix4d K0;
     K0 << 2.0 / 3, -1.0 / 6, -1.0 / 3, -1.0 / 6,
