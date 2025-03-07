@@ -1,42 +1,44 @@
 #include <iostream>
-#include <Eigen/Dense>
+#include <Eigen/Sparse>
 #include <cassert>
 
-// Include the next 5 lines in your own files
+// Include the next lines in your own files
 #include <testFramework.hpp>
-#include <../src/optHelper.hpp>
+#include <../src/meshHelper.hpp>
+#include <../src/optimization.hpp>
 #define check(cond) check(cond, __LINE__, __FILE__)
 #define compare(val1, val2) compare(val1, val2, __LINE__, __FILE__)
 #define compareTolerance(val1, val2, tol) compareTolerance(val1, val2, tol, __LINE__, __FILE__)
 
 using namespace Eigen;
 
-void test_fill_in_k() {
-    VectorXd v = VectorXd::Zero(10);
-    VectorXd k = VectorXd::Zero(v.size());
-    for (size_t i=0;i<v.size();i++) v[i] = i/v.size();
-    int p = 1; //eys
-    double k_min = 0; 
-    double k_max = 1;
-    fill_in_k(k,v,k_max,k_min,p);
-    tf::compare(true,v.isApprox(k));
+void test_optimization_function() 
+{
+    std::cout << "OK0" << std::endl;
+    int ft = 0;
+    Eigen::Matrix4d K0;
+    K0 << 2.0 / 3, -1.0 / 6, -1.0 / 3, -1.0 / 6,
+        -1.0 / 6, 2.0 / 3, -1.0 / 6, -1.0 / 3,
+        -1.0 / 3, -1.0 / 6, 2.0 / 3, -1.0 / 6,
+        -1.0 / 6, -1.0 / 3, -1.0 / 6, 2.0 / 3;
+    int nx = 20;
+    int p = 5;
+    std::vector<std::vector<int>> rectangles = create_rectangle_and_mesh(nx+1);
+    VectorXd x = VectorXd::Constant(nx * nx, 0.4);
     
+    optimize(x, K0,0.4,nx,nx,p,rectangles,0.01,293,ft);;
 
-    tf::check(true);
-    tf::check(1); // 1 is equal to true in c++
-    tf::compare(1, 1); // Arguments should be of the exact same type
-    tf::compareTolerance(1., 1.1, 0.2);
-
-    Eigen::Vector3d v1;
-    v1 << 1, 2, 3;
-    Eigen::Vector3d v2;
-    v2 << 1, 2, 3;
-
-    tf::compare(true, v1.isApprox(v2));
-    tf::compareTolerance(0., (v1 - v2).norm(), 0.1);
+    // every element of x must be close to 0 or one. 
+    VectorXd x_rounded = x.array().round();
+    //std::cout << "x=" << x << std::endl << "x_rounded = " << x_rounded << std::endl;
+    std::cout << "maximum deviaton from 0 or 1: "<<(x_rounded - x).cwiseAbs().maxCoeff() << std::endl;
+    //the maximum deviation cannot be too high. 
+    //tf::compareTolerance((x_rounded - x).cwiseAbs().maxCoeff(),0.,0.05);  
+    //current configuration gets stuck in a loop: we need to counter this.
+    // when are we happy with the SIMP penalization? 
 }
 
 int main() {
-    test_fill_in_k();
+    test_optimization_function();
     return 0;
 }

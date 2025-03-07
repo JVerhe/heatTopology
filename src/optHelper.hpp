@@ -2,7 +2,7 @@
 #define optHelper_hpp
 
 #include <cassert>
-#include <Eigen/Dense>
+#include <Eigen/Sparse>
 #include <map>
 #include <cmath>
 
@@ -43,20 +43,21 @@ double objective(const Eigen::VectorXd& v, const std::vector<std::vector<int>>& 
     double D = 0.0;
     Eigen::VectorXd k_values = Eigen::VectorXd::Zero(v.size());
     fill_in_k(k_values, v, k_max, k_min, p);
+    assert(v.size() == rectangles.size());
 
     for (size_t e = 0; e < rectangles.size(); ++e) {
         double k_e = k_values(e);
 
-        // Extraction de T_loc (4x1)
+        // Extraction of T_loc (4x1)
         Eigen::VectorXd T_loc(4);
         for (int l = 0; l < 4; ++l) {
             T_loc(l) = T(rectangles[e][l]);
         }
 
-        // Calcul du produit K * T_loc en utilisant SparseMatrix
+        // Calculation of K * T_loc
         Eigen::VectorXd K_T_loc = k_e * K0 * T_loc;
 
-        // Mise à jour de D avec le produit scalaire (T_loc^T * K * T_loc)
+        // (T_loc^T * K * T_loc)
         D += T_loc.transpose() * K_T_loc;
     }
 
@@ -256,22 +257,7 @@ void find_new_densities(
 
         double lmid = 0.5 * (l1 + l2);
         VectorXd B = (-dc.array() / (dv.array() * lmid)).max(0).sqrt();
-        VectorXd Bx = B.array() * x.array();
-
-        //update_x
-        xnew = Eigen::VectorXd::Zero(x.size());
-        for (int e = 0; e < x.size(); ++e) {
-            if (Bx[e] <= std::max(0.0, x[e] - move)) {
-                xnew[e] = std::max(0.0, x[e] - move);
-            }
-            else if (Bx[e] >= std::min(1.0, x[e] + move)) {
-                xnew[e] = std::min(1.0, x[e] + move);
-            }
-            else {
-                xnew[e] = Bx[e];
-            }
-        }
-
+        
         update_densities(x,xnew,B,move);
 
         if (ft == 0 || ft == 1) {

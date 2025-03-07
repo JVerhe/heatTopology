@@ -55,7 +55,9 @@ int main(int argc, char* argv[]) {
 
 
     std::vector<std::vector<int>> rectangles = create_rectangle_and_mesh(number_of_points);
-    Eigen::VectorXd x = optimize(local_matrix, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
+    
+    Eigen::VectorXd x = Eigen::VectorXd::Constant((number_of_points-1) * (number_of_points-1), vol_frac);
+    optimize(x,local_matrix, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
 
 
     char outputfile[100] = "output/results.txt";
