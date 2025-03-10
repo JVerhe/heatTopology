@@ -195,7 +195,7 @@ void solve_sparse_lin_sys(const SparseMatrix<double>& K, const VectorXd& F, Vect
  * 
  * @param x Old densities. 
  * @param xnew New densities. 
- * @param B Vector needed for updating scheme. 
+ * @param Bx Vector needed for updating scheme: B@x 
  * @param move Maximum change per iteration per element.
  * 
  * @return void 
@@ -203,10 +203,9 @@ void solve_sparse_lin_sys(const SparseMatrix<double>& K, const VectorXd& F, Vect
 void update_densities(
     const VectorXd& x,
     VectorXd& xnew,
-    const VectorXd& B,
+    const VectorXd& Bx,
     const float move
 ){
-    VectorXd Bx = B.array() * x.array();
     for (int e = 0; e < x.size(); ++e) {
         if (Bx[e] <= std::max(0.0, x[e] - move)) {
             xnew[e] = std::max(0.0, x[e] - move);
@@ -252,13 +251,14 @@ void find_new_densities(
 ){
     double l1 = 0;
     double l2 = 1e9;
-    double move = 0.3;
+    double move = 0.1;
     while ((l2 - l1) / (l2 + l1) > 0.001) {
 
         double lmid = 0.5 * (l1 + l2);
         VectorXd B = (-dc.array() / (dv.array() * lmid)).max(0).sqrt();
-        
-        update_densities(x,xnew,B,move);
+        VectorXd Bx = B.array() * x.array();
+
+        update_densities(x,xnew,Bx,move);
 
         if (ft == 0 || ft == 1) {
             xPhys = xnew;

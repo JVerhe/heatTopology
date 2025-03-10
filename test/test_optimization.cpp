@@ -14,14 +14,14 @@ using namespace Eigen;
 
 void test_optimization_function() 
 {
-    int ft = 0;
+    int ft = 2;
     Eigen::Matrix4d K0;
     K0 << 2.0 / 3, -1.0 / 6, -1.0 / 3, -1.0 / 6,
         -1.0 / 6, 2.0 / 3, -1.0 / 6, -1.0 / 3,
         -1.0 / 3, -1.0 / 6, 2.0 / 3, -1.0 / 6,
         -1.0 / 6, -1.0 / 3, -1.0 / 6, 2.0 / 3;
-    int nx = 20;
-    int p = 5;
+    int nx = 19;
+    int p = 4;
     std::vector<std::vector<int>> rectangles = create_rectangle_and_mesh(nx+1);
     VectorXd x = VectorXd::Constant(nx * nx, 0.4);
     
@@ -31,10 +31,9 @@ void test_optimization_function()
     VectorXd x_rounded = x.array().round();
     //std::cout << "x=" << x << std::endl << "x_rounded = " << x_rounded << std::endl;
     std::cout << "maximum deviaton from 0 or 1: "<<(x_rounded - x).cwiseAbs().maxCoeff() << std::endl;
+    std::cout << "mean deviation from 0 or 1 with penal="<<p<<":"<< (x_rounded - x).cwiseAbs().mean() << std::endl;
     //the maximum deviation cannot be too high. 
-    //tf::compareTolerance((x_rounded - x).cwiseAbs().maxCoeff(),0.,0.05);  
-    //current configuration gets stuck in a loop: we need to counter this.
-    // when are we happy with the SIMP penalization? 
+    tf::compareTolerance((x_rounded - x).cwiseAbs().mean(),0.,0.2/p);   
 }
 
 int main() {
