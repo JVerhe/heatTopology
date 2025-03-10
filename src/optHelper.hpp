@@ -2,7 +2,7 @@
 #define optHelper_hpp
 
 #include <cassert>
-#include <Eigen/Dense>
+#include <Eigen/Sparse>
 #include <map>
 #include <cmath>
 
@@ -11,20 +11,17 @@ using namespace Eigen;
 /**
  * Computes the material property values (k) based on the density vector (v).
  *
+ * @param k Vector of material condictivity values. 
  * @param v Vector of densities (values between 0 and 1).
  * @param k_max Maximum stiffness value.
  * @param k_min Minimum stiffness value.
  * @param p Penalization factor.
- * @return Eigen::VectorXd containing computed k values.
+ * @return void.
 */
-Eigen::VectorXd fill_in_k(const Eigen::VectorXd& v, double k_max, double k_min, double p) {
-    Eigen::VectorXd k(v.size());
-
+void fill_in_k(Eigen::VectorXd& k, const Eigen::VectorXd& v, double k_max, double k_min, double p) {  
     for (int i = 0; i < v.size(); ++i) {
         k(i) = k_min + (k_max - k_min) * std::pow(v(i), p);
     }
-
-    return k;
 }
 
 /**
@@ -44,21 +41,23 @@ double objective(const Eigen::VectorXd& v, const std::vector<std::vector<int>>& 
     double k_min, double k_max, double p) {
 
     double D = 0.0;
-    Eigen::VectorXd k_values = fill_in_k(v, k_max, k_min, p);
+    Eigen::VectorXd k_values = Eigen::VectorXd::Zero(v.size());
+    fill_in_k(k_values, v, k_max, k_min, p);
+    assert(v.size() == rectangles.size());
 
     for (size_t e = 0; e < rectangles.size(); ++e) {
         double k_e = k_values(e);
 
-        // Extraction de T_loc (4x1)
+        // Extraction of T_loc (4x1)
         Eigen::VectorXd T_loc(4);
         for (int l = 0; l < 4; ++l) {
             T_loc(l) = T(rectangles[e][l]);
         }
 
-        // Calcul du produit K * T_loc en utilisant SparseMatrix
+        // Calculation of K * T_loc
         Eigen::VectorXd K_T_loc = k_e * K0 * T_loc;
 
-        // Mise à jour de D avec le produit scalaire (T_loc^T * K * T_loc)
+        // (T_loc^T * K * T_loc)
         D += T_loc.transpose() * K_T_loc;
     }
 
@@ -151,12 +150,12 @@ void create_sparse_matrix(
     SparseMatrix<double>& H, 
     VectorXd& Hs
 ){
-    vector<int> iH,jH; 
-    vector<double> sH;
+    std::vector<int> iH,jH; 
+    std::vector<double> sH;
     sparse_H_setup(nx,ny,rmin,iH,jH,sH);
 
     int N = nx * ny;
-    vector<Triplet<double>> tripletList;
+    std::vector<Triplet<double>> tripletList;
 
     for (size_t k = 0; k < sH.size(); ++k) {
         tripletList.emplace_back(iH[k], jH[k], sH[k]);
@@ -196,7 +195,7 @@ void solve_sparse_lin_sys(const SparseMatrix<double>& K, const VectorXd& F, Vect
  * 
  * @param x Old densities. 
  * @param xnew New densities. 
- * @param B Vector needed for updating scheme. 
+ * @param Bx Vector needed for updating scheme: B@x 
  * @param move Maximum change per iteration per element.
  * 
  * @return void 
@@ -204,10 +203,9 @@ void solve_sparse_lin_sys(const SparseMatrix<double>& K, const VectorXd& F, Vect
 void update_densities(
     const VectorXd& x,
     VectorXd& xnew,
-    const VectorXd& B,
+    const VectorXd& Bx,
     const float move
 ){
-    VectorXd Bx = B.array() * x.array();
     for (int e = 0; e < x.size(); ++e) {
         if (Bx[e] <= std::max(0.0, x[e] - move)) {
             xnew[e] = std::max(0.0, x[e] - move);
@@ -253,28 +251,14 @@ void find_new_densities(
 ){
     double l1 = 0;
     double l2 = 1e9;
-    double move = 0.3;
+    double move = 0.1;
     while ((l2 - l1) / (l2 + l1) > 0.001) {
 
         double lmid = 0.5 * (l1 + l2);
         VectorXd B = (-dc.array() / (dv.array() * lmid)).max(0).sqrt();
         VectorXd Bx = B.array() * x.array();
 
-        //update_x
-        xnew = Eigen::VectorXd::Zero(x.size());
-        for (int e = 0; e < x.size(); ++e) {
-            if (Bx[e] <= std::max(0.0, x[e] - move)) {
-                xnew[e] = std::max(0.0, x[e] - move);
-            }
-            else if (Bx[e] >= std::min(1.0, x[e] + move)) {
-                xnew[e] = std::min(1.0, x[e] + move);
-            }
-            else {
-                xnew[e] = Bx[e];
-            }
-        }
-
-        update_densities(x,xnew,B,move);
+        update_densities(x,xnew,Bx,move);
 
         if (ft == 0 || ft == 1) {
             xPhys = xnew;

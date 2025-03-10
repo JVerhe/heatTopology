@@ -1,7 +1,7 @@
 #include <iostream>
-#include <Eigen/Dense>
+#include <Eigen/Sparse>
 
-// Include the next 3 lines in your own files
+// Include the next 5 lines in your own files
 #include <testFramework.hpp>
 #include <../src/meshHelper.hpp>
 #define check(cond) check(cond, __LINE__, __FILE__)
@@ -19,7 +19,6 @@ void exampleTest1() { // Should work
     Eigen::Vector3d v2;
     v2 << 1, 2, 3;
 
-    tf::compare(true, v1.isApprox(v2));
     tf::compareTolerance(0., (v1 - v2).norm(), 0.1);
 
     create_rectangle_and_mesh(50); // Functions of the project can still be called

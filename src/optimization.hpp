@@ -46,6 +46,7 @@ void save_result_to_file(const Eigen::VectorXd& U, const std::string& filename) 
  * Efficient topology optimization in MATLAB using 88 lines of code.
  * Structural and Multidisciplinary Optimization, 43, 1-16.
  *
+ * @param x the vector containing the initial solution. On return, it contains the solution. 
  * @param K0 The constant part of the local conductivity matrix.
  * @param max_vol_frac The maximum amount of volume percentage of metal on the plate.
  * @param nx The amount of elements in x-direction.
@@ -55,8 +56,11 @@ void save_result_to_file(const Eigen::VectorXd& U, const std::string& filename) 
  * @param L The side length of the plate.
  * @param boundary_temp The fixed temperature at the outlets.
  * @param ft The filtering option: 0=no filtering, 1=sensitivity filtering, 2=density filtering.
+ * 
+ * @return void
  */
-Eigen::VectorXd optimize(
+void optimize(
+    Eigen::VectorXd& x,
     const Eigen::MatrixXd& K0,
     double max_vol_frac,
     int nx, int ny,
@@ -78,8 +82,7 @@ Eigen::VectorXd optimize(
     VectorXd Hs; //sum of rows of H
     if (ft != 0) create_sparse_matrix(nx, ny, rmin, H, Hs);
 
-
-    VectorXd x = VectorXd::Constant(nx * ny, max_vol_frac);
+    assert(x.size() == nx*ny);
     VectorXd x_phys = x;
 
     double curr_obj = 1e6;
@@ -126,6 +129,5 @@ Eigen::VectorXd optimize(
             save_result_to_file(x, filename);
         }
     }
-    return x;
 }
 #endif
