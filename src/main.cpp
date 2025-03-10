@@ -8,6 +8,10 @@
 
 void readConfig(const std::string& filename, int& number_of_points, int& p, int& ft) {
     std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "No test file with this name found" << std::endl;
+        return;
+    }
     file >> number_of_points >> p >> ft;
     file.close();
 }
@@ -44,7 +48,6 @@ int main(int argc, char* argv[]) {
 
     std::signal(SIGSEGV, signalHandler);
     std::string file_name = argv[1];
-    std::cout << file_name << std::endl;
     std::string config_file = "config/" + file_name + ".txt";
 
     readConfig(config_file, number_of_points, p, ft);
