@@ -66,7 +66,7 @@ def plotOptimalSolution(files):
 
 def plotEvolution(idxList, files):
     size = len(idxList)
-    figure, axis = plt.subplots(1, size)
+    _, axis = plt.subplots(1, size, squeeze=False)
 
     for i, fileIdx in enumerate(idxList):
         target_file = files[fileIdx]
@@ -82,9 +82,9 @@ def plotEvolution(idxList, files):
             quad4 = np.fliplr(quad3)
             matrix = np.vstack((np.hstack((quad1, quad2)), np.hstack((quad3, quad4))))
 
-            axis[i].imshow(matrix, cmap='gray_r', interpolation='nearest')
+            axis[0,i].imshow(matrix, cmap='gray_r', interpolation='nearest')
             iterationNr = re.findall(r"iteration\s*(.*?)(?=\.)", target_file)
-            axis[i].set_title("Iteration " + iterationNr[0])
+            axis[0,i].set_title("Iteration " + iterationNr[0])
 
         elif target_file == "density.txt":
             vector = np.loadtxt("output/" + target_file)
@@ -95,14 +95,17 @@ def plotEvolution(idxList, files):
             quad4 = np.fliplr(quad3)
             matrix = np.vstack((np.hstack((quad1, quad2)), np.hstack((quad3, quad4))))
 
-            axis[i].imshow(matrix, cmap='gray_r', interpolation='nearest')
-            axis[i].set_title("Metal fraction")
+            axis[0,i].imshow(matrix, cmap='gray_r', interpolation='nearest')
+            axis[0,i].set_title("Final Metal fraction")
 
         elif target_file == "objective_values.txt":
-            axis[i].set_title("Cost function")
+            vector = np.loadtxt("output/" + target_file)
+            axis[0,i].plot(vector)
+            axis[0,i].set_title("Cost function")
 
+        # TODO
         elif target_file == "temperature.txt":
-            axis[i].set_title("Temperature (K)")
+            axis[0,i].set_title("Temperature (K)")
 
     plt.show()
     return
