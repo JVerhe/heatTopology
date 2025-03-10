@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
     char outputfile[100] = "output/results.txt";
     save_result_to_file(x, outputfile);
 
-    std::string callPython = "python3 plot_result.py";
+    std::string callPython = "python3 ../src/plot_result.py";
     int rc = system(callPython.c_str());
     return 0;
 }
