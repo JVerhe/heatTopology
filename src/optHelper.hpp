@@ -24,6 +24,8 @@ Eigen::VectorXd fill_in_k(const Eigen::VectorXd& v, double k_max, double k_min, 
     for (int i = 0; i < v.size(); ++i) {
         k(i) = k_min + (k_max - k_min) * std::pow(v(i), p);
     }
+
+    return k;
 }
 
 
@@ -44,8 +46,8 @@ double objective(const Eigen::VectorXd& v, const std::vector<std::vector<int>>& 
     */
 
     double D = 0.0;
-    Eigen::VectorXd k_values = Eigen::VectorXd::Zero(v.size());
-    fill_in_k(k_values, v, k_max, k_min, p);
+    Eigen::VectorXd k_values = fill_in_k(v, k_max, k_min, p);
+
     assert(v.size() == rectangles.size());
 
     for (size_t e = 0; e < rectangles.size(); ++e) {
@@ -162,20 +164,20 @@ void solve_sparse_lin_sys(const SparseMatrix<double>& K, const VectorXd& F, Vect
     U = solver.solve(F);
 }
 
-/** 
- * @brief Updates densities according to heuristic optimization scheme as implemented in the reference paper. 
- * 
- * @param x Old densities. 
- * @param xnew New densities. 
- * @param Bx Vector needed for updating scheme: B@x 
+/**
+ * @brief Updates densities according to heuristic optimization scheme as implemented in the reference paper.
+ *
+ * @param x Old densities.
+ * @param xnew New densities.
+ * @param Bx Vector needed for updating scheme: B@x
  * @param move Maximum change per iteration per element.
- * 
- * @return void 
+ *
+ * @return void
  */
 void update_densities(
     const VectorXd& x,
     VectorXd& xnew,
-    const VectorXd& Bx,
+    const VectorXd& B,
     const float move
 ) {
     VectorXd Bx = B.array() * x.array();

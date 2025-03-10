@@ -51,7 +51,7 @@ Eigen::VectorXd optimize(
     VectorXd Hs; //sum of rows of H
     if (ft != 0) create_sparse_matrix(nx, ny, rmin, H, Hs);
 
-    assert(x.size() == nx*ny);
+    assert(x.size() == nx * ny);
     VectorXd x_phys = x;
 
     double curr_obj = 1e6;
@@ -64,7 +64,7 @@ Eigen::VectorXd optimize(
     while (change > 0.01 && loop < 200) {
         loop++;
 
-        Eigen::SparseMatrix<double> K = find_K(xPhys, rectangles, N_points_1D, K0, 0.2, 65.0, penal);
+        Eigen::SparseMatrix<double> K = find_K(x_phys, rectangles, N_points_1D, K0, 0.2, 65.0, penal);
         Eigen::VectorXd F = find_F(rectangles, N_points_1D, L);
 
         auto result = apply_boundary(K, F, boundary_points, boundary_temp);
@@ -73,8 +73,8 @@ Eigen::VectorXd optimize(
         VectorXd U = VectorXd::Zero(F.size());
         solve_sparse_lin_sys(K, F, U);
 
-        double c = objective(xPhys, rectangles, U, K0, 0.2, 65, penal);
-        Eigen::VectorXd dc = adjoint(U, xPhys, rectangles, K0, penal);
+        double c = objective(x_phys, rectangles, U, K0, 0.2, 65, penal);
+        Eigen::VectorXd dc = adjoint(U, x_phys, rectangles, K0, penal);
         VectorXd dv = VectorXd::Ones(dc.size());
 
         if (ft == 1) { // Sensitivity filtering
@@ -87,12 +87,12 @@ Eigen::VectorXd optimize(
         }
         Eigen::VectorXd xnew = Eigen::VectorXd::Zero(x.size());
 
-        find_new_densities(nx, ny, x, xPhys, xnew, dc, dv, H, Hs, ft, max_vol_frac);
+        find_new_densities(nx, ny, x, x_phys, xnew, dc, dv, H, Hs, ft, max_vol_frac);
 
         change = (xnew - x).cwiseAbs().maxCoeff();
         x = xnew;
 
-        std::cout << "It.: " << loop << "\t Obj.: " << c << "\t Vol.: " << xPhys.mean() << "\t ch.: " << change << std::endl;
+        std::cout << "It.: " << loop << " Obj.: " << c << " Vol.: " << x_phys.mean() << " ch.: " << change << std::endl;
         if (loop % 20 == 0) {
             char filename[100];
             sprintf(filename, "output/result_p%.1f_iteration%d.txt", penal, loop);
