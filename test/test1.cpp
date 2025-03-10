@@ -1,7 +1,7 @@
 #include <iostream>
-#include <Eigen/Dense>
+#include <Eigen/Sparse>
 
-// Include the next 3 lines in your own files
+// Include the next 5 lines in your own files
 #include <testFramework.hpp>
 #include <../src/meshHelper.hpp>
 #define check(cond) check(cond, __LINE__, __FILE__)

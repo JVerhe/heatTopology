@@ -79,7 +79,13 @@ int main(int argc, char* argv[]) {
     x = x.cwiseMin(1.0).cwiseMax(0.0); // Ensure all values remain in [0,1]
 
     std::vector<std::vector<int>> rectangles = create_rectangle_and_mesh(number_of_points);
-    Eigen::VectorXd result = optimize(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
+    
+    Eigen::VectorXd x = Eigen::VectorXd::Constant((number_of_points-1) * (number_of_points-1), vol_frac);
+    optimize(x,local_matrix, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
+
+
+    char outputfile[100] = "output/results.txt";
+    save_result_to_file(x, outputfile);
 
     std::string callPython = "python3 ../src/plot_result.py";
     int rc = system(callPython.c_str());

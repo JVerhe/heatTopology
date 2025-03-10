@@ -7,6 +7,8 @@
 #include <type_traits>
 #include <sstream>
 #include <stdlib.h>
+#include <iostream>
+#include <vector>
 
 namespace tf {
 
@@ -46,6 +48,17 @@ namespace tf {
             throw std::invalid_argument(oss.str());
         }
     }
+    
+    template <typename T>
+    void print_2D_vector(const std::vector<std::vector<T>>& vec) {
+        for (const auto& row : vec) {
+            for (int val : row) {
+                std::cout << val << " ";
+            }
+            std::cout << std::endl; // Newline after each row
+        }
+    }
+
 
 }
 

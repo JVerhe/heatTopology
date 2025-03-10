@@ -51,8 +51,10 @@ Eigen::VectorXd optimize(
     VectorXd Hs; //sum of rows of H
     if (ft != 0) create_sparse_matrix(nx, ny, rmin, H, Hs);
 
+    assert(x.size() == nx*ny);
+    VectorXd x_phys = x;
 
-    VectorXd xPhys = x;
+    double curr_obj = 1e6;
     int loop = 0;
     double change = 1;
     Eigen::MatrixXd coordinates = create_coordinates(L, N_points_1D);
