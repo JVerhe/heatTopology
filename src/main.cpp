@@ -4,6 +4,9 @@
 #include <cstdlib>
 #include "optimization.hpp"
 #include "meshHelper.hpp"
+#include <random>
+#include <chrono>
+
 
 
 void readConfig(const std::string& filename, int& number_of_points, int& p, int& ft) {
@@ -62,9 +65,21 @@ int main(int argc, char* argv[]) {
         -1.0 / 6, -1.0 / 3, -1.0 / 6, 2.0 / 3;
 
 
-    std::vector<std::vector<int>> rectangles = create_rectangle_and_mesh(number_of_points);
-    Eigen::VectorXd x = optimize(local_matrix, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
+    int size = (number_of_points - 1) * (number_of_points - 1);
+    std::random_device rd;
+    std::mt19937 gen(rd());  // Generator with a random seed
+    std::uniform_real_distribution<> dis(0.0, 1.0);
 
+    Eigen::VectorXd x(size);
+    for (int i = 0; i < size; ++i) {
+        x(i) = dis(gen) * 0.5 + 0.5;  // Fill the vector with random values between 0 and 1
+    }
+
+    x = (x.array() - x.mean()) + 0.4;  // Adjust the mean to 0.4
+    x = x.cwiseMin(1.0).cwiseMax(0.0); // Ensure all values remain in [0,1]
+
+    std::vector<std::vector<int>> rectangles = create_rectangle_and_mesh(number_of_points);
+    Eigen::VectorXd result = optimize(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
 
     char outputfile[100] = "output/results.txt";
     save_result_to_file(x, outputfile);

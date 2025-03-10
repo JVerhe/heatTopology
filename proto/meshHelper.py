@@ -1,6 +1,7 @@
 import numpy as np
 from optHelper import adjoint
 import matplotlib.pyplot as plt
+from mms import *
 
 def create_rectangle_and_mesh(number_of_points): 
     ############
@@ -160,13 +161,11 @@ def load_result_from_file(filename):
         U = np.array([float(line.strip()) for line in lines])
     return U
 
-"""
-U_loaded = load_result_from_file("result.txt")
 
-
+U_loaded = load_result_from_file("Results/density.txt")
 
 L = 0.01 
-number_of_points = 70
+number_of_points = 40
 p = 3
 T_k =  293
 
@@ -174,21 +173,44 @@ local_matrix = [[2/3,-1/6,-1/3,-1/6],[-1/6,2/3,-1/6,-1/3],[-1/3,-1/6,2/3,-1/6],[
 
 rectangles = create_rectangle_and_mesh(number_of_points) ; v = np.ones(len(rectangles))*0.2
 coordinates = create_coordinates(L,number_of_points)
-boundary_points = filter_boundary_points_with_index(coordinates,L)
-# K = find_K(v,rectangles,number_of_points,local_matrix,0.2,65,p)
+##boundary_points = filter_boundary_points_with_index(coordinates,L)
+boundary_points = filter_boundary_points_with_index_mms(coordinates,L)
+print(len(boundary_points))
+
+
+period = 3
+k_constant = 0.2
+
+q_point = create_q_point(coordinates,k_constant,L,number_of_points,period)
+q_rectangle = create_q_rectangle(rectangles,q_point)
+K = find_K(v,rectangles,number_of_points,local_matrix,0.2,65,p)
 # F = find_F(rectangles,number_of_points,L)
-# print(F)
-# K,F = apply_boundary(K,F,boundary_points,T_k)
-# T = np.linalg.solve(K,F)
+F = find_F_mms(rectangles,number_of_points,L,q_rectangle)
+K,F = apply_boundary(K,F,boundary_points,T_k)
+T = np.linalg.solve(K,F)
 
 
-T_matrix = U_loaded.reshape((number_of_points, number_of_points))
-T_matrix = transform_matrix(T_matrix)
+T_matrix = T.reshape((number_of_points, number_of_points))
+##T_matrix = transform_matrix(T_matrix)
 plt.figure(figsize=(6, 5))
-plt.imshow(T_matrix, cmap='hot', origin='lower', extent=[0, L, 0, L])
+plt.imshow(T_matrix, cmap='magma', origin='lower', extent=[0, L, 0, L])
 plt.colorbar(label="Température (K)")
 plt.title("Distribution de la température")
 plt.xlabel("x (m)")
 plt.ylabel("y (m)")
 plt.show()
-"""
+
+T_true  = create_T_point(q_point,k_constant,L,T_k,period)
+Err  = T-T_true
+
+Err_matrix = Err.reshape((number_of_points, number_of_points))
+##T_matrix = transform_matrix(T_matrix)
+plt.figure(figsize=(6, 5))
+plt.imshow(Err_matrix, cmap='gray_r', origin='lower', extent=[0, L, 0, L])
+plt.colorbar(label="Error (K)")
+plt.title("Error with the true solution")
+plt.xlabel("x (m)")
+plt.ylabel("y (m)")
+plt.show()
+
+print(np.linalg.norm(Err/(number_of_points*number_of_points)))
