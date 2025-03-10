@@ -100,8 +100,10 @@ def plotEvolution(idxList, files):
 
         elif target_file == "objective_values.txt":
             vector = np.loadtxt("output/" + target_file)
-            axis[0,i].plot(vector)
-            axis[0,i].set_title("Cost function")
+            axis[0, i].plot(vector)
+            axis[0, i].set_yscale('log')
+            axis[0, i].set_title("Cost function (Log Scale)")
+            axis[0, i].set_xlabel("Iteration")
 
         # TODO
         elif target_file == "temperature.txt":
