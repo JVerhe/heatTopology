@@ -90,22 +90,27 @@ Eigen::VectorXd optimize(
         change = (xnew - x).cwiseAbs().maxCoeff();
         x = xnew;
 
-        std::cout << "It.: " << loop << " Obj.: " << c << " Vol.: " << xPhys.mean() << " ch.: " << change << std::endl;
+        std::cout << "It.: " << loop << "\t Obj.: " << c << "\t Vol.: " << xPhys.mean() << "\t ch.: " << change << std::endl;
+        if (loop % 20 == 0) {
+            char filename[100];
+            sprintf(filename, "output/result_p%.1f_iteration%d.txt", penal, loop);
+            save_result_to_file(x, filename);
+        }
+
         objective_values.push_back(c);
         temperature_values.push_back(U.maxCoeff());
 
     }
 
-
     Eigen::VectorXd objective_value = Eigen::VectorXd::Map(objective_values.data(), objective_values.size());
-    char filename_values[100] = "/output/objective_values.txt";
+    char filename_values[100] = "output/objective_values.txt";
     save_result_to_file(objective_value, filename_values);
 
     Eigen::VectorXd temperature_value = Eigen::VectorXd::Map(temperature_values.data(), temperature_values.size());
-    char filename_temperature[100] = "/output/temperature.txt";
+    char filename_temperature[100] = "output/temperature.txt";
     save_result_to_file(temperature_value, filename_temperature);
 
-    char outputfile[100] = "/output/density.txt";
+    char outputfile[100] = "output/density.txt";
     save_result_to_file(x, outputfile);
 
     return x;

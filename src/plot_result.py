@@ -16,10 +16,12 @@ def listFiles():
         if not file.endswith(".txt"):
             files.remove(file)
 
-    files.remove("results.txt")
+    nonSortedFiles = ["objective_values.txt", "temperature.txt", "density.txt"]
+    
+    for f in nonSortedFiles:
+        files.remove(f)
     files = sorted(files, key=lambda x: int(re.findall(r"iteration\s*(.*?)(?=\.)", x)[-1]))
-    files.append("results.txt")
-    # files.insert(0, files.pop(files.index("results.txt")))
+    files.extend(nonSortedFiles)
 
     print("\n\n")
     print("Choose which file to plot. (Press ctrl+C to exit)")
@@ -47,7 +49,7 @@ def listIntermediateSolutions(files):
 
 
 def plotOptimalSolution(files):
-    target_file = files[0]
+    target_file = files[-1]
     vector = np.loadtxt("output/" + target_file)
     dim = int(sqrt(vector.size))
     quad1 = vector.reshape(dim, dim)
@@ -69,22 +71,38 @@ def plotEvolution(idxList, files):
     for i, fileIdx in enumerate(idxList):
         target_file = files[fileIdx]
         
-        vector = np.loadtxt("output/" + target_file)
-        dim = int(sqrt(vector.size))
-        quad1 = vector.reshape(dim, dim)
-        quad2 = np.fliplr(quad1)
-        quad3 = np.flipud(quad1)
-        quad4 = np.fliplr(quad3)
-        matrix = np.vstack((np.hstack((quad1, quad2)), np.hstack((quad3, quad4))))
+        nonSortedFiles = ["objective_values.txt", "temperature.txt", "density.txt"]
+        if target_file not in nonSortedFiles:
 
-        axis[i].imshow(matrix, cmap='gray_r', interpolation='nearest')
+            vector = np.loadtxt("output/" + target_file)
+            dim = int(sqrt(vector.size))
+            quad1 = vector.reshape(dim, dim)
+            quad2 = np.fliplr(quad1)
+            quad3 = np.flipud(quad1)
+            quad4 = np.fliplr(quad3)
+            matrix = np.vstack((np.hstack((quad1, quad2)), np.hstack((quad3, quad4))))
 
-        if target_file != "results.txt":
+            axis[i].imshow(matrix, cmap='gray_r', interpolation='nearest')
             iterationNr = re.findall(r"iteration\s*(.*?)(?=\.)", target_file)
             axis[i].set_title("Iteration " + iterationNr[0])
 
-        else:
-            axis[i].set_title("Final result")
+        elif target_file == "density.txt":
+            vector = np.loadtxt("output/" + target_file)
+            dim = int(sqrt(vector.size))
+            quad1 = vector.reshape(dim, dim)
+            quad2 = np.fliplr(quad1)
+            quad3 = np.flipud(quad1)
+            quad4 = np.fliplr(quad3)
+            matrix = np.vstack((np.hstack((quad1, quad2)), np.hstack((quad3, quad4))))
+
+            axis[i].imshow(matrix, cmap='gray_r', interpolation='nearest')
+            axis[i].set_title("Metal fraction")
+
+        elif target_file == "objective_values.txt":
+            axis[i].set_title("Cost function")
+
+        elif target_file == "temperature.txt":
+            axis[i].set_title("Temperature (K)")
 
     plt.show()
     return
