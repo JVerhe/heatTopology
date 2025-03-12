@@ -49,7 +49,7 @@ if(BUILD_TESTS)
             COMMENT "Running Test File ${TEST_EXEC}"
         )
         
-        # Make run_tests depend on each run_<testname> target
+        # Make `run_tests` depend on each `run_<testname>` target
         add_dependencies(run_tests run_${TEST_EXEC})
     endforeach()
 

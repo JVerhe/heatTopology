@@ -26,6 +26,7 @@ void exampleTest1() { // Should work
 
 int main() {
     exampleTest1();
+    std::cout << "test1 ran succesfully" << std::endl;
     return 0;
 }
 

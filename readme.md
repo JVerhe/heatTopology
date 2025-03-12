@@ -64,5 +64,4 @@ After executing the main program it is possible to visualize the results from in
 
 1. `cd build`
 2. `cmake -DBUILD_TESTS=ON ..` (can be set to `OFF` when you don't want to compile the tests)
-3. `cmake --build .`
-4. `cmake --build . --target run_tests` (everytime you want to compile the tests)
+3. `cmake --build . --target run_tests` (everytime you want to run only the tests)
