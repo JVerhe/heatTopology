@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::vector<int>> rectangles = create_rectangle_and_mesh(number_of_points);
 
-    Eigen::VectorXd result = optimize(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
+    optimize(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
 
     // Call Python visualization script
     std::string callPython = "python3 ../src/plot_result.py";

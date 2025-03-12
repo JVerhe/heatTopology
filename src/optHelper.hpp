@@ -69,25 +69,24 @@ double objective(const Eigen::VectorXd& v, const std::vector<std::vector<int>>& 
     return D;
 }
 
-
-Eigen::VectorXd adjoint(const Eigen::VectorXd& T, const Eigen::VectorXd& v,
+/**
+* Compute the derivative of the cost function with respect to the fraction of metal for each element.
+*
+* @param gradJv: A column vector of size(n) containing the derivative of the cost function.
+* @param T: The global temperature vector.
+* @param v: The global vector with fractions of metal in each element.
+* @param corners: A nested list with first index as elements and second index as the nodes of each element.
+* @param K0: The local stiffness matrix (4x4).
+* @param p: Penalization factor that pushes fractions of metal towards 0 or 1 (p > 1).
+* @param kmin: minimum conductivity. 
+* @param kmax: maximum conductivity. 
+* @return void
+*/
+void adjoint(Eigen::VectorXd& gradJv, const Eigen::VectorXd& T, const Eigen::VectorXd& v,
     const std::vector<std::vector<int>>& corners,
-    const Eigen::MatrixXd& K0, double p = 3) {
-    /**
-    * Compute the derivative of the cost function with respect to the fraction of metal for each element.
-    *
-    * @param T: The global temperature vector.
-    * @param v: The global vector with fractions of metal in each element.
-    * @param corners: A nested list with first index as elements and second index as the nodes of each element.
-    * @param K0: The local stiffness matrix (4x4).
-    * @param p: Penalization factor that pushes fractions of metal towards 0 or 1 (p > 1).
-    * @return gradJv: A column vector of size(n) containing the derivative of the cost function.
-    */
+    const Eigen::MatrixXd& K0, double p = 3, double kmin=0.2, double kmax=65) {
 
     int elements = v.size();
-    Eigen::VectorXd gradJv(elements);
-    double km = 65;
-    double kp = 0.2;
 
     for (int el = 0; el < elements; ++el) {
         const std::vector<int>& elementNodes = corners[el];
@@ -97,10 +96,8 @@ Eigen::VectorXd adjoint(const Eigen::VectorXd& T, const Eigen::VectorXd& v,
         }
 
         // Compute the derivative (using Eigen matrix and vector operations)
-        gradJv(el) = -0.5 * p * std::pow(v(el), p - 1) * (km - kp) * (Te.transpose() * K0 * Te)(0, 0);
+        gradJv(el) = -0.5 * p * std::pow(v(el), p - 1) * (kmax - kmin) * (Te.transpose() * K0 * Te)(0, 0);
     }
-
-    return gradJv;
 }
 void sparse_H_setup(
     const int nx, const int ny,
