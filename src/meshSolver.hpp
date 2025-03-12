@@ -63,16 +63,16 @@ Eigen::VectorXd find_F(std::vector<std::vector<int>> rectangles, int number_of_p
 std::pair<Eigen::SparseMatrix<double>, Eigen::VectorXd> apply_boundary(Eigen::SparseMatrix<double>& K, Eigen::VectorXd& F, std::vector<Eigen::Vector3d> boundary_points, double T_k) {
     for (const auto& point : boundary_points) {
         int index_of_point = point[0];
-        F -= T_k * K.col(index_of_point);  // Soustraction du terme de force local
+        F -= T_k * K.col(index_of_point);  
 
-        // Mise à zéro des coefficients de la matrice K associés au point de bordure
+        
         for (int i = 0; i < K.rows(); ++i) {
             K.coeffRef(i, index_of_point) = 0;
             K.coeffRef(index_of_point, i) = 0;
         }
 
-        K.coeffRef(index_of_point, index_of_point) = 1; // Diagonal égale à 1
-        F(index_of_point) = T_k; // Force au point de bordure
+        K.coeffRef(index_of_point, index_of_point) = 1; 
+        F(index_of_point) = T_k;
     }
 
     return { K, F };

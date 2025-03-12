@@ -25,8 +25,31 @@ void save_result_to_file(const Eigen::VectorXd& U, const std::string& filename) 
     }
 }
 
-
-Eigen::VectorXd optimize(
+/**
+ * @brief Performs a heuristic algorithm for heat topology optimization.
+ *
+ * This function heuristically optimizes the distribution of metal on a FEM-discretized plate.
+ * It ensures elements to be either fully metal or fully plastic via the SIMP method.
+ * Results are saved in folder 'output'.
+ * Inspiration for this code is taken from:
+ * Andreassen, E., Clausen, A., Schevenels, M., Lazarov, B. S., & Sigmund, O. (2011).
+ * Efficient topology optimization in MATLAB using 88 lines of code.
+ * Structural and Multidisciplinary Optimization, 43, 1-16.
+ *
+ * @param x the vector containing the initial solution. On return, it contains the solution. 
+ * @param K0 The constant part of the local conductivity matrix.
+ * @param max_vol_frac The maximum amount of volume percentage of metal on the plate.
+ * @param nx The amount of elements in x-direction.
+ * @param ny The amount of elements in y-direction.
+ * @param penal The penalization factor in the SIMP method.
+ * @param rectangles The numbering of neighbouring grid points for each element.
+ * @param L The side length of the plate.
+ * @param boundary_temp The fixed temperature at the outlets.
+ * @param ft The filtering option: 0=no filtering, 1=sensitivity filtering, 2=density filtering.
+ * 
+ * @return void
+ */
+void optimize(
     const Eigen::MatrixXd& K0,
     Eigen::VectorXd& x,
     double max_vol_frac,
@@ -64,8 +87,8 @@ Eigen::VectorXd optimize(
     while (change > 0.01 && loop < 200) {
         loop++;
 
-        Eigen::SparseMatrix<double> K = find_K(x_phys, rectangles, N_points_1D, K0, 0.2, 65.0, penal);
-        Eigen::VectorXd F = find_F(rectangles, N_points_1D, L);
+        SparseMatrix<double> K = find_K(x_phys, rectangles, N_points_1D, K0, 0.2, 65.0, penal);
+        VectorXd F = find_F(rectangles, N_points_1D, L);
 
         auto result = apply_boundary(K, F, boundary_points, boundary_temp);
         K = result.first;
@@ -74,7 +97,8 @@ Eigen::VectorXd optimize(
         solve_sparse_lin_sys(K, F, U);
 
         double c = objective(x_phys, rectangles, U, K0, 0.2, 65, penal);
-        Eigen::VectorXd dc = adjoint(U, x_phys, rectangles, K0, penal);
+        VectorXd dc = VectorXd::Zero(x_phys.size());
+        adjoint(dc,U, x_phys, rectangles, K0, penal);
         VectorXd dv = VectorXd::Ones(dc.size());
 
         if (ft == 1) { // Sensitivity filtering
@@ -114,8 +138,6 @@ Eigen::VectorXd optimize(
 
     char outputfile[100] = "output/density.txt";
     save_result_to_file(x, outputfile);
-
-    return x;
 }
 
 #endif
