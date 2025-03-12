@@ -94,8 +94,8 @@ void optimize(
     while (change > 0.01 && loop < 200) {
         loop++;
 
-        Eigen::SparseMatrix<double> K = find_K(x_phys, rectangles, N_points_1D, K0, 0.2, 65.0, penal);
-        Eigen::VectorXd F = find_F(rectangles, N_points_1D, L);
+        SparseMatrix<double> K = find_K(x_phys, rectangles, N_points_1D, K0, 0.2, 65.0, penal);
+        VectorXd F = find_F(rectangles, N_points_1D, L);
 
         auto result = apply_boundary(K, F, boundary_points, boundary_temp);
         K = result.first;
@@ -104,7 +104,8 @@ void optimize(
         solve_sparse_lin_sys(K, F, U);
 
         double c = objective(x_phys, rectangles, U, K0, 0.2, 65, penal);
-        Eigen::VectorXd dc = adjoint(U, x_phys, rectangles, K0, penal);
+        VectorXd dc = VectorXd::Zero(x_phys.size());
+        adjoint(dc,U, x_phys, rectangles, K0, penal);
         VectorXd dv = VectorXd::Ones(dc.size());
 
         if (ft == 1) { // Sensitivity filtering

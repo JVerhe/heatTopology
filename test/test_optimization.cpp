@@ -27,12 +27,12 @@ void test_optimization_function()
     
     optimize(x, K0,0.4,nx,nx,p,rectangles,0.01,293,ft);;
 
-    // every element of x must be close to 0 or one. 
+    // every element of x must be close to zero or one. 
     VectorXd x_rounded = x.array().round();
     //std::cout << "x=" << x << std::endl << "x_rounded = " << x_rounded << std::endl;
     std::cout << "maximum deviaton from 0 or 1: "<<(x_rounded - x).cwiseAbs().maxCoeff() << std::endl;
     std::cout << "mean deviation from 0 or 1 with penal="<<p<<":"<< (x_rounded - x).cwiseAbs().mean() << std::endl;
-    //the maximum deviation cannot be too high. 
+    //the mean deviation cannot be too high. 
     tf::compareTolerance((x_rounded - x).cwiseAbs().mean(),0.,0.2/p);   
 }
 
