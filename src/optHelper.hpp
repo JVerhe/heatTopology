@@ -128,8 +128,8 @@ void create_sparse_matrix(
     SparseMatrix<double>& H,
     VectorXd& Hs
 ) {
-    vector<int> iH, jH;
-    vector<double> sH;
+    std::vector<int> iH, jH;
+    std::vector<double> sH;
     sparse_H_setup(nx, ny, rmin, iH, jH, sH);
 
     int N = nx * ny;

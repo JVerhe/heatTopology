@@ -81,9 +81,9 @@ void test_adjoint()
         mean_square_error[j] = mean_error[j]*mean_error[j];
         max_error[j] = (Fin_diff - Expected_diff).cwiseAbs().maxCoeff();
     }
-    std::cout << "eps_vec : " << eps_vec << std::endl;
-    std::cout << "mean_errors : " << mean_error << std::endl;
-    std::cout << "max_errors : " << max_error << std::endl;
+    //std::cout << "eps_vec : " << eps_vec << std::endl;
+    //std::cout << "mean_errors : " << mean_error << std::endl;
+    //std::cout << "max_errors : " << max_error << std::endl;
 
     save_result_to_file(eps_vec,"adjoint_eps_vec.txt");
     save_result_to_file(mean_error,"adjoint_mean_error.txt");
