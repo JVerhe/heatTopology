@@ -64,7 +64,7 @@ def plotOptimalSolution(files):
     return
 
 
-def plotEvolution(idxList, files):
+def plotCollection(idxList, files):
     size = len(idxList)
     _, axis = plt.subplots(1, size, squeeze=False)
 
@@ -102,12 +102,15 @@ def plotEvolution(idxList, files):
             vector = np.loadtxt("output/" + target_file)
             axis[0, i].plot(vector)
             axis[0, i].set_yscale('log')
-            axis[0, i].set_title("Cost function (Log Scale)")
+            axis[0, i].set_title("Cost function")
             axis[0, i].set_xlabel("Iteration")
 
         # TODO
         elif target_file == "temperature.txt":
-            axis[0,i].set_title("Temperature (K)")
+            vector = np.loadtxt("output/" + target_file)
+            axis[0, i].plot(vector)
+            axis[0, i].set_xlabel("Iteration")
+            axis[0,i].set_title("Maximal Temperature (K)")
 
     plt.show()
     return
@@ -126,7 +129,7 @@ def readUserInput(files):
             return
         case 1:
             plotIndices = listIntermediateSolutions(files)
-            plotEvolution(plotIndices, files)
+            plotCollection(plotIndices, files)
             return
         case 2:
             exit()
