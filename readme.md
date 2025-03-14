@@ -26,23 +26,25 @@ Compilation flags can be changed in CMakeLists.txt
 
 ## Running the main.cpp
 
-- A config file inside the folder `/build/config/` has to be present. It should look like this.
+- A config file inside the folder `/build/config` has to be present. It should look like this.
 
 ```
 Number of Discretization points in one dimension (int)
 Metal fraction penalty exponent (double)
 Filtering technique (0 = no filtering, 1 = sensitivity filtering, 2 = density filtering)
+Call the Python visualization script? (0 = false, 1 = true)
 ```
 
 For example a `config.txt` could look like this:
 
 ```
-20
-2
-2
+points 20
+penalty 2
+filtering 2
+visualize 1
 ```
 
-The main file can be executed by running `./main config`
+The main file can then be executed by running `./main config`
 
 ## Plotting the Results
 
