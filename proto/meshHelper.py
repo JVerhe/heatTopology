@@ -78,7 +78,8 @@ def find_K(v,rectangles,number_of_points,local_matrix,k_min,k_max,penal):
     ## L : the length of the chip
     #####
     K = np.zeros((number_of_points*number_of_points,number_of_points*number_of_points))
-    k_values = fill_in_k(v,k_max,k_min,p=penal)
+    k_values = fill_in_k(v,k_max,k_min,p=penal)    
+    
     for e,rectangle in enumerate(rectangles):
         k_e = k_values[e]  
         for l in range(4):
@@ -114,28 +115,29 @@ def apply_boundary(K,F,boundary_points,T_k):
     
     return K,F
 
-
 def transform_matrix(T):
     """
-    This function takes a square matrix T and creates a new matrix that is four times its size.
+    This function takes a square matrix T and creates a new matrix that is (2n-1, 2m-1) in size.
     - The top-left quarter contains the original matrix.
-    - The top-right quarter contains the matrix with its columns reversed.
-    - The bottom-left quarter contains the matrix with its rows reversed.
-    - The bottom-right quarter contains the matrix with both rows and columns reversed.
+    - The top-right quarter contains the matrix with its columns reversed, except for the last column.
+    - The bottom-left quarter contains the matrix with its rows reversed, except for the last row.
+    - The bottom-right quarter contains the matrix with both rows and columns reversed, without duplicating the last row or column.
     """
     n, m = T.shape
-    new_matrix = np.zeros((2 * n, 2 * m))
-    
+    new_matrix = np.zeros((2 * n - 1, 2 * m - 1))
+
+    # Top-left: Original matrix
     new_matrix[:n, :m] = T
-    T_swapped_columns = T[:, ::-1]
-    new_matrix[:n, m:] = T_swapped_columns
-    
-    T_swapped_rows = T[::-1, :]
-    new_matrix[n:, :m] = T_swapped_rows
-    
-    T_swapped_rows_columns = T_swapped_rows[:, ::-1]
-    new_matrix[n:, m:] = T_swapped_rows_columns
-    
+
+    # Top-right: Columns reversed (except last column)
+    new_matrix[:n, m:] = T[:, -2::-1]
+
+    # Bottom-left: Rows reversed (except last row)
+    new_matrix[n:, :m] = T[-2::-1, :]
+
+    # Bottom-right: Rows and columns reversed (except last row and last column)
+    new_matrix[n:, m:] = T[-2::-1, -2::-1]
+
     return new_matrix
 
 
@@ -161,37 +163,35 @@ def load_result_from_file(filename):
         U = np.array([float(line.strip()) for line in lines])
     return U
 
+#U_loaded = load_result_from_file("Results/density.txt")
 
-U_loaded = load_result_from_file("Results/density.txt")
-
-L = 0.01 
+L = 0.01
 number_of_points = 40
-p = 3
+p = 1
 T_k =  293
 
 local_matrix = [[2/3,-1/6,-1/3,-1/6],[-1/6,2/3,-1/6,-1/3],[-1/3,-1/6,2/3,-1/6],[-1/6,-1/3,-1/6,2/3]]
 
-rectangles = create_rectangle_and_mesh(number_of_points) ; v = np.ones(len(rectangles))*0.2
+rectangles = create_rectangle_and_mesh(number_of_points) ; v = np.ones(len(rectangles))*(0.8/(65-0.2))
 coordinates = create_coordinates(L,number_of_points)
-##boundary_points = filter_boundary_points_with_index(coordinates,L)
+#boundary_points = filter_boundary_points_with_index(coordinates,L)
 boundary_points = filter_boundary_points_with_index_mms(coordinates,L)
-print(len(boundary_points))
-
 
 period = 3
-k_constant = 0.2
+k_constant = 0.5
 
-q_point = create_q_point(coordinates,k_constant,L,number_of_points,period)
-q_rectangle = create_q_rectangle(rectangles,q_point)
+q_point = create_q_point(coordinates,L,number_of_points,period)
+#q_rectangle = create_q_rectangle(rectangles,q_point)
+q_rectangle = create_q_rectangle_middle(rectangles,coordinates,L,number_of_points,period)
 K = find_K(v,rectangles,number_of_points,local_matrix,0.2,65,p)
-# F = find_F(rectangles,number_of_points,L)
 F = find_F_mms(rectangles,number_of_points,L,q_rectangle)
 K,F = apply_boundary(K,F,boundary_points,T_k)
 T = np.linalg.solve(K,F)
 
 
+
 T_matrix = T.reshape((number_of_points, number_of_points))
-##T_matrix = transform_matrix(T_matrix)
+# T_matrix = transform_matrix(T_matrix)
 plt.figure(figsize=(6, 5))
 plt.imshow(T_matrix, cmap='magma', origin='lower', extent=[0, L, 0, L])
 plt.colorbar(label="Température (K)")
@@ -200,11 +200,16 @@ plt.xlabel("x (m)")
 plt.ylabel("y (m)")
 plt.show()
 
-T_true  = create_T_point(q_point,k_constant,L,T_k,period)
-Err  = T-T_true
 
+T_true  = create_T_point(coordinates,k_constant,L,number_of_points,period)
+
+# for i in range(len(T)):
+#     if(q_point[i]!=0):
+#         print((T[i]-293)/(q_point[i]))
+
+Err  = T-T_true
 Err_matrix = Err.reshape((number_of_points, number_of_points))
-##T_matrix = transform_matrix(T_matrix)
+
 plt.figure(figsize=(6, 5))
 plt.imshow(Err_matrix, cmap='gray_r', origin='lower', extent=[0, L, 0, L])
 plt.colorbar(label="Error (K)")
@@ -213,4 +218,4 @@ plt.xlabel("x (m)")
 plt.ylabel("y (m)")
 plt.show()
 
-print(np.linalg.norm(Err/(number_of_points*number_of_points)))
+##print(np.linalg.norm(Err/(number_of_points*number_of_points)))
