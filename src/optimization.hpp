@@ -36,7 +36,7 @@ void save_result_to_file(const Eigen::VectorXd& U, const std::string& filename) 
  * Efficient topology optimization in MATLAB using 88 lines of code.
  * Structural and Multidisciplinary Optimization, 43, 1-16.
  *
- * @param x the vector containing the initial solution. On return, it contains the solution. 
+ * @param x the vector containing the initial solution. On return, it contains the solution.
  * @param K0 The constant part of the local conductivity matrix.
  * @param max_vol_frac The maximum amount of volume percentage of metal on the plate.
  * @param nx The amount of elements in x-direction.
@@ -46,7 +46,7 @@ void save_result_to_file(const Eigen::VectorXd& U, const std::string& filename) 
  * @param L The side length of the plate.
  * @param boundary_temp The fixed temperature at the outlets.
  * @param ft The filtering option: 0=no filtering, 1=sensitivity filtering, 2=density filtering.
- * 
+ *
  * @return void
  */
 void optimize(
@@ -58,7 +58,8 @@ void optimize(
     const std::vector<std::vector<int>>& rectangles,
     double L,
     double boundary_temp,
-    int ft
+    int ft,
+    int visualize = 0
 ) {
     std::vector<double> objective_values;
     std::vector<double> temperature_values;
@@ -98,7 +99,7 @@ void optimize(
 
         double c = objective(x_phys, rectangles, U, K0, 0.2, 65, penal);
         VectorXd dc = VectorXd::Zero(x_phys.size());
-        adjoint(dc,U, x_phys, rectangles, K0, penal);
+        adjoint(dc, U, x_phys, rectangles, K0, penal);
         VectorXd dv = VectorXd::Ones(dc.size());
 
         if (ft == 1) { // Sensitivity filtering
@@ -117,14 +118,14 @@ void optimize(
         x = xnew;
 
         std::cout << "It.: " << loop << " Obj.: " << c << " Vol.: " << x_phys.mean() << " ch.: " << change << std::endl;
-        // if (loop % 20 == 0) {
-        //     char filename[100];
-        //     sprintf(filename, "output/result_p%.1f_iteration%d.txt", penal, loop);
-        //     save_result_to_file(x, filename);
-        // }
-
         objective_values.push_back(c);
         temperature_values.push_back(U.maxCoeff());
+        if (visualize == 1 && (loop >= 2 && (objective_values[loop - 1] < objective_values[loop - 2] * 0.9) || loop == 1)) {
+            char filename[100];
+            sprintf(filename, "output/result_obj%.1f_iteration%d.txt", objective_values[loop - 1], loop);
+            save_result_to_file(x, filename);
+        }
+
 
     }
 

@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
 
     int number_of_points; int p; int ft; int visualize;
 
-    std::signal(SIGSEGV, signalHandler); // Notify that no config file with a certain name is found
+    std::signal(SIGSEGV, signalHandler); // TODO: rebuild this part so that the error is only thrown when no config file has been found
     std::string file_name = argv[1];
     std::string config_file = "config/" + file_name + ".txt";
 
@@ -112,7 +112,7 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::vector<int>> rectangles = create_rectangle_and_mesh(number_of_points);
 
-    optimize(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
+    optimize(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft, visualize);
 
     if (visualize == 1) {
         // Call Python visualization script
