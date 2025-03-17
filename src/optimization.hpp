@@ -169,6 +169,7 @@ void optimize(
         std::cout << "____________Results for optimization of grid size " << nx << " x " << ny << "____________" << std::endl;
         std::cout << "Finished optimization process after " << time << "s time and " << loop << " iterations" << std::endl;
         std::cout << "Average time per iteration step: " << time / loop << "s" << std::endl;
+        std::cout << "Average iterations per second: " << loop / time << "/s" << std::endl;
         std::cout << std::endl;
 
         int frac5 = loop / 20;
