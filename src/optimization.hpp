@@ -8,6 +8,7 @@
 #include <iostream>
 #include <meshHelper.hpp>
 #include <cassert>
+#include <chrono>
 
 using namespace Eigen;
 
@@ -24,6 +25,20 @@ void save_result_to_file(const Eigen::VectorXd& U, const std::string& filename) 
         std::cerr << "Error when saving " << filename << std::endl;
     }
 }
+
+
+double get_cummulative_sum(std::vector<double> durations, int final_idx) {
+    double sum = 0.;
+    for (int i = 0; i < final_idx; i++) {
+        sum += durations[i];
+    }
+    return sum;
+}
+
+double get_delta(std::vector<double> v, int final_idx) {
+    return v[0] - v[final_idx];
+}
+
 
 /**
  * @brief Performs a heuristic algorithm for heat topology optimization.
@@ -46,6 +61,7 @@ void save_result_to_file(const Eigen::VectorXd& U, const std::string& filename) 
  * @param L The side length of the plate.
  * @param boundary_temp The fixed temperature at the outlets.
  * @param ft The filtering option: 0=no filtering, 1=sensitivity filtering, 2=density filtering.
+ * @param visualize If visualize=0 -> benchmark the code, if visualize = 1 -> save intermediate results and call python script to plot
  *
  * @return void
  */
@@ -83,9 +99,17 @@ void optimize(
     double change = 1;
     Eigen::MatrixXd coordinates = create_coordinates(L, N_points_1D);
     std::vector<Eigen::Vector3d> boundary_points = filter_boundary_points_with_index(coordinates, L);
+    std::chrono::steady_clock::time_point t1;
+    std::vector<double> loop_durations;
 
-
+    if (visualize == 0) {
+        t1 = std::chrono::steady_clock::now();
+    }
     while (change > 0.01 && loop < 200) {
+        std::chrono::steady_clock::time_point loop_start;
+        if (visualize == 0) {
+            loop_start = std::chrono::steady_clock::now();
+        }
         loop++;
 
         SparseMatrix<double> K = find_K(x_phys, rectangles, N_points_1D, K0, 0.2, 65.0, penal);
@@ -117,28 +141,78 @@ void optimize(
         change = (xnew - x).cwiseAbs().maxCoeff();
         x = xnew;
 
-        std::cout << "It.: " << loop << " Obj.: " << c << " Vol.: " << x_phys.mean() << " ch.: " << change << std::endl;
-        objective_values.push_back(c);
-        temperature_values.push_back(U.maxCoeff());
-        if (visualize == 1 && (loop >= 2 && (objective_values[loop - 1] < objective_values[loop - 2] * 0.9) || loop == 1)) {
-            char filename[100];
-            sprintf(filename, "output/result_obj%.1f_iteration%d.txt", objective_values[loop - 1], loop);
-            save_result_to_file(x, filename);
+        if (visualize == 0) {
+            std::chrono::steady_clock::time_point loop_end = std::chrono::steady_clock::now();
+            std::chrono::duration<double> loop_time = loop_end - loop_start;
+            loop_durations.push_back(loop_time.count());
         }
 
 
+        objective_values.push_back(c);
+        temperature_values.push_back(U.maxCoeff());
+
+        if (visualize == 1) {
+            std::cout << "It.: " << loop << " Obj.: " << c << " Vol.: " << x_phys.mean() << " ch.: " << change << std::endl;
+            if (loop >= 2 && (objective_values[loop - 1] < objective_values[loop - 2] * 0.9) || loop == 1) {
+                char filename[100];
+                sprintf(filename, "output/result_obj%.1f_iteration%d.txt", objective_values[loop - 1], loop);
+                save_result_to_file(x, filename);
+            }
+        }
     }
 
-    Eigen::VectorXd objective_value = Eigen::VectorXd::Map(objective_values.data(), objective_values.size());
-    char filename_values[100] = "output/objective_values.txt";
-    save_result_to_file(objective_value, filename_values);
+    // TODO implement with loops instead of this atrocity
+    if (visualize == 0) { // Print timing results to the console
+        std::chrono::steady_clock::time_point tend = std::chrono::steady_clock::now();
+        std::chrono::duration<double> diff = tend - t1;
+        double time = diff.count();
+        std::cout << "____________Results for optimization of grid size " << nx << " x " << ny << "____________" << std::endl;
+        std::cout << "Finished optimization process after " << time << "s time and " << loop << " iterations" << std::endl;
+        std::cout << "Average time per iteration step: " << time / loop << "s" << std::endl;
+        std::cout << std::endl;
 
-    Eigen::VectorXd temperature_value = Eigen::VectorXd::Map(temperature_values.data(), temperature_values.size());
-    char filename_temperature[100] = "output/temperature.txt";
-    save_result_to_file(temperature_value, filename_temperature);
+        int frac5 = loop / 20;
+        int frac10 = loop / 10;
+        int frac25 = loop / 4;
+        int frac50 = loop / 2;
+        double elapsed5 = get_cummulative_sum(loop_durations, frac5);
+        double elapsed10 = get_cummulative_sum(loop_durations, frac10);
+        double elapsed25 = get_cummulative_sum(loop_durations, frac25);
+        double elapsed50 = get_cummulative_sum(loop_durations, frac50);
+        double elapsed100 = get_cummulative_sum(loop_durations, loop);
+        std::cout << "Average time per loop: " << std::endl;
+        std::cout << "First 5%: " << elapsed5 / frac5 << std::endl;
+        std::cout << "First 10%: " << elapsed10 / frac10 << std::endl;
+        std::cout << "First 25%: " << elapsed25 / frac25 << std::endl;
+        std::cout << "First 50%: " << elapsed50 / frac50 << std::endl;
+        std::cout << "First 100%: " << elapsed100 / loop << std::endl;
+        std::cout << std::endl;
+        double obj5 = get_delta(objective_values, frac5);
+        double obj10 = get_delta(objective_values, frac10);
+        double obj25 = get_delta(objective_values, frac25);
+        double obj50 = get_delta(objective_values, frac50);
+        double obj100 = get_delta(objective_values, loop);
 
-    char outputfile[100] = "output/density.txt";
-    save_result_to_file(x, outputfile);
+        std::cout << "Delta(objective) / time" << std::endl;
+        std::cout << "First 5%: " << obj5 / elapsed5 << "/s" << std::endl;
+        std::cout << "First 10%: " << obj10 / elapsed10 << "/s" << std::endl;
+        std::cout << "First 25%: " << obj25 / elapsed25 << "/s" << std::endl;
+        std::cout << "First 50%: " << obj50 / elapsed50 << "/s" << std::endl;
+        std::cout << "First 100%: " << obj100 / elapsed100 << "/s" << std::endl;
+    }
+
+    if (visualize == 1) {
+        Eigen::VectorXd objective_value = Eigen::VectorXd::Map(objective_values.data(), objective_values.size());
+        char filename_values[100] = "output/objective_values.txt";
+        save_result_to_file(objective_value, filename_values);
+
+        Eigen::VectorXd temperature_value = Eigen::VectorXd::Map(temperature_values.data(), temperature_values.size());
+        char filename_temperature[100] = "output/temperature.txt";
+        save_result_to_file(temperature_value, filename_temperature);
+
+        char outputfile[100] = "output/density.txt";
+        save_result_to_file(x, outputfile);
+    }
 }
 
 #endif

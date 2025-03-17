@@ -24,11 +24,12 @@ def listFiles():
     files.extend(nonSortedFiles)
 
     print("\n\n")
-    print("Choose which file to plot. (Press ctrl+C to exit)")
+    print("Choose which file to plot.")
 
     print("\t[0]\tPlot most optimal solution")
     print("\t[1]\tPlot evolution of solutions")
-    print("\t[2]\tExit")
+    print("\t[2]\tDelete all .txt files and exit")
+    print("\t[3]\tExit")
 
     return files
 
@@ -105,7 +106,6 @@ def plotCollection(idxList, files):
             axis[0, i].set_title("Cost function")
             axis[0, i].set_xlabel("Iteration")
 
-        # TODO
         elif target_file == "temperature.txt":
             vector = np.loadtxt("output/" + target_file)
             axis[0, i].plot(vector)
@@ -115,6 +115,14 @@ def plotCollection(idxList, files):
     plt.show()
     return
 
+def deleteFiles(files):
+    try:
+        for f in files:
+            os.remove("output/" + f)
+        print("Removed all the files")
+    except:
+        print("Something went wrong")
+    return
 
 def readUserInput(files):
     try:
@@ -132,6 +140,10 @@ def readUserInput(files):
             plotCollection(plotIndices, files)
             return
         case 2:
+            deleteFiles(files)
+            exit()
+            return
+        case 3:
             exit()
         case _:
             print("Not a valid input.")

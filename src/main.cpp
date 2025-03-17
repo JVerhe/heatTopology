@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int number_of_points; int p; int ft; int visualize;
+    int number_of_points; int p; int ft; int visualize; int time;
 
     std::signal(SIGSEGV, signalHandler); // TODO: rebuild this part so that the error is only thrown when no config file has been found
     std::string file_name = argv[1];

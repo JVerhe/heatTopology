@@ -32,7 +32,7 @@ Compilation flags can be changed in CMakeLists.txt
 Number of Discretization points in one dimension (int)
 Metal fraction penalty exponent (double)
 Filtering technique (0 = no filtering, 1 = sensitivity filtering, 2 = density filtering)
-Call the Python visualization script? (0 = false, 1 = true)
+Call the Python visualization script? (0 = false (useful for benchmarking), 1 = true)
 ```
 
 For example a `config.txt` could look like this:
