@@ -3,6 +3,7 @@
 #include <csignal>
 #include <cstdlib>
 #include "optimization.hpp"
+#include "mms.cpp"
 #include "meshHelper.hpp"
 #include <random>
 #include <chrono>
@@ -40,6 +41,7 @@ void signalHandler(int signal) {
     std::exit(signal);
 }
 
+
 int main(int argc, char* argv[]) {
 
     if (argc == 1) {
@@ -54,6 +56,7 @@ int main(int argc, char* argv[]) {
     std::string config_file = "config/" + file_name + ".txt";
 
     readConfig(config_file, number_of_points, p, ft);
+    std::cout<<"ok"<<std::endl;
     double  L = 0.01;
     double T_k = 293;
     double vol_frac = 0.4;
@@ -80,10 +83,21 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::vector<int>> rectangles = create_rectangle_and_mesh(number_of_points);
 
-    optimize(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
+    bool test = true;
+
+    if(!test){
+        optimize(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
+    }else{
+        for (int i = 0; i < size; ++i) {
+            x(i) = 0.8/(65-0.2);  // Fill the vector with random values between 0 and 1
+        }
+        VectorXd T = solve_simple(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
+        std::cout<<T<<std::endl; 
+    }
+
 
     // Call Python visualization script
-    std::string callPython = "python3 ../src/plot_result.py";
-    int rc = system(callPython.c_str());
+    // std::string callPython = "python3 ../src/plot_result.py";
+    // int rc = system(callPython.c_str());
     return 0;
 }

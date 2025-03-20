@@ -22,6 +22,9 @@ Eigen::SparseMatrix<double> find_K(
 
     Eigen::VectorXd k_values = k_min + (k_max - k_min) * v.array().pow(penal);
 
+    std::cout<<k_values<<std::endl;
+
+
     int size = number_of_points * number_of_points;
     Eigen::SparseMatrix<double> K(size, size);
 
@@ -48,7 +51,7 @@ Eigen::VectorXd find_F(std::vector<std::vector<int>> rectangles, int number_of_p
     Eigen::VectorXd F = Eigen::VectorXd::Zero(number_of_points * number_of_points);
 
     for (const auto& rectangle : rectangles) {
-        double F_local = (h * h) * (10e6) / 4.;
+        double F_local = (h * h) * (10e6) / 2.;
 
         for (int l = 0; l < 4; ++l) {
             int index_i = rectangle[l];
@@ -60,21 +63,63 @@ Eigen::VectorXd find_F(std::vector<std::vector<int>> rectangles, int number_of_p
 }
 
 
-std::pair<Eigen::SparseMatrix<double>, Eigen::VectorXd> apply_boundary(Eigen::SparseMatrix<double>& K, Eigen::VectorXd& F, std::vector<Eigen::Vector3d> boundary_points, double T_k) {
-    for (const auto& point : boundary_points) {
+std::pair<Eigen::SparseMatrix<double>, Eigen::VectorXd> apply_boundary(Eigen::SparseMatrix<double>& K, Eigen::VectorXd& F, std::vector<Eigen::Vector3d>& boundary_points, double T_k) {
+    int count = 0 ;
+
+
+    for (Eigen::Vector3d point : boundary_points) {
         int index_of_point = point[0];
         F -= T_k * K.col(index_of_point);  
 
-        
         for (int i = 0; i < K.rows(); ++i) {
             K.coeffRef(i, index_of_point) = 0;
             K.coeffRef(index_of_point, i) = 0;
         }
-
         K.coeffRef(index_of_point, index_of_point) = 1; 
         F(index_of_point) = T_k;
+        count ++;
     }
 
     return { K, F };
 }
+
+
+std::pair<Eigen::SparseMatrix<double>, Eigen::VectorXd> apply_boundary_conditions_band(Eigen::SparseMatrix<double>& K, Eigen::VectorXd& F, const std::vector<Eigen::Vector3d>& boundary_points, double T_k) {
+    int n = K.rows();
+    int bandwidth = static_cast<int>(std::sqrt(n)) + 1;  
+
+    for (const auto& point : boundary_points) {
+        int index = static_cast<int>(point[0]); 
+        F -= T_k * K.col(index); 
+    
+        for (int k = std::max(0, index - 4*bandwidth); k < std::min(n, index + 4*bandwidth); ++k) {
+            if (k != index) {  
+                K.coeffRef(k, index) = 0.0;
+                K.coeffRef(index, k) = 0.0;
+            }
+        }
+        K.coeffRef(index, index) = 1.0;
+
+        F(index) = T_k;
+    }
+    return { K, F };
+}
+
+std::pair<Eigen::SparseMatrix<double>, Eigen::VectorXd> apply_boundary_conditions_optimized(Eigen::SparseMatrix<double>& K, Eigen::VectorXd& F, const std::vector<Eigen::Vector3d>& boundary_points, double T_k) {
+    int n = K.rows();
+    int bandwidth = static_cast<int>(std::sqrt(n)) + 1;  
+
+    for (const auto& point : boundary_points) {
+        int index = static_cast<int>(point[0]); 
+
+        K.coeffRef(index, index) = 1e31 ;
+
+        F(index) = T_k*1e31;
+
+    }
+    return { K, F };
+}
+
+
+
 #endif

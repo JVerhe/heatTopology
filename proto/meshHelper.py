@@ -96,7 +96,7 @@ def find_F(rectangles,number_of_points,L):
     h = (L/2)/(number_of_points-1)
     F = np.zeros(number_of_points * number_of_points)
     for rectangle in rectangles: 
-        F_local = (h**2)*(10**7)/(4)
+        F_local = (h**2)*(10**7)/(2)
         for l in range(4):
             index_i = int(rectangle[l])  
             F[index_i] += F_local 
@@ -163,13 +163,15 @@ def load_result_from_file(filename):
         U = np.array([float(line.strip()) for line in lines])
     return U
 
-#U_loaded = load_result_from_file("Results/density.txt")
+
+
 
 L = 0.01
 number_of_points = 40
 p = 1
 T_k =  293
-
+period = 1
+k_constant = 0.5
 local_matrix = [[2/3,-1/6,-1/3,-1/6],[-1/6,2/3,-1/6,-1/3],[-1/3,-1/6,2/3,-1/6],[-1/6,-1/3,-1/6,2/3]]
 
 rectangles = create_rectangle_and_mesh(number_of_points) ; v = np.ones(len(rectangles))*(0.8/(65-0.2))
@@ -177,23 +179,35 @@ coordinates = create_coordinates(L,number_of_points)
 #boundary_points = filter_boundary_points_with_index(coordinates,L)
 boundary_points = filter_boundary_points_with_index_mms(coordinates,L)
 
-period = 3
-k_constant = 0.5
 
-q_point = create_q_point(coordinates,L,number_of_points,period)
-#q_rectangle = create_q_rectangle(rectangles,q_point)
-q_rectangle = create_q_rectangle_middle(rectangles,coordinates,L,number_of_points,period)
-K = find_K(v,rectangles,number_of_points,local_matrix,0.2,65,p)
-F = find_F_mms(rectangles,number_of_points,L,q_rectangle)
-K,F = apply_boundary(K,F,boundary_points,T_k)
-T = np.linalg.solve(K,F)
+mms = True
+
+if mms==False : 
+    h = (L/2)/(number_of_points-1)
+    q_rectangle = create_q_rectangle_middle(rectangles,coordinates,L,number_of_points,period)
+    
+    #q_rectangle = create_q_rectangle_middle_k_variable(rectangles,coordinates,L,number_of_points,period)
+    #K = find_K_with_k_variable(v,rectangles,number_of_points,local_matrix,coordinates,0.2,65,p)
+    F = find_F_mms(rectangles,number_of_points,L,q_rectangle)
+    
+    K = find_K(v,rectangles,number_of_points,local_matrix,0.2,65,p)
+    #F = find_F(rectangles,number_of_points,L)
+    
+    K,F = apply_boundary(K,F,boundary_points,T_k)
+    T_matrix = np.linalg.solve(K,F)
+    T_matrix_r = T_matrix.reshape((number_of_points, number_of_points))
+    #T_matrix_r = transform_matrix(T_matrix_r)
 
 
+if mms==True:
+    
+    h = (L/2)/(number_of_points-1)
+    T_matrix = load_result_from_file("../build/output/temperature_mms.txt")
+    T_matrix_r = T_matrix.reshape((number_of_points, number_of_points))
 
-T_matrix = T.reshape((number_of_points, number_of_points))
-# T_matrix = transform_matrix(T_matrix)
+
 plt.figure(figsize=(6, 5))
-plt.imshow(T_matrix, cmap='magma', origin='lower', extent=[0, L, 0, L])
+plt.imshow(T_matrix_r, cmap='magma', origin='lower', extent=[0, L, 0, L])
 plt.colorbar(label="Température (K)")
 plt.title("Distribution de la température")
 plt.xlabel("x (m)")
@@ -201,21 +215,65 @@ plt.ylabel("y (m)")
 plt.show()
 
 
-T_true  = create_T_point(coordinates,k_constant,L,number_of_points,period)
 
-# for i in range(len(T)):
-#     if(q_point[i]!=0):
-#         print((T[i]-293)/(q_point[i]))
+if mms==False:
 
-Err  = T-T_true
-Err_matrix = Err.reshape((number_of_points, number_of_points))
+    T_true  = create_T_point(coordinates,k_constant,L,number_of_points,period)
+    T_true_r = T_true.reshape((number_of_points, number_of_points))
+    Err  = T_matrix_r - T_true_r
 
-plt.figure(figsize=(6, 5))
-plt.imshow(Err_matrix, cmap='gray_r', origin='lower', extent=[0, L, 0, L])
-plt.colorbar(label="Error (K)")
-plt.title("Error with the true solution")
-plt.xlabel("x (m)")
-plt.ylabel("y (m)")
-plt.show()
+    plt.figure(figsize=(6, 5))
+    plt.imshow(Err, cmap='gray_r', origin='lower', extent=[0, L, 0, L])
+    plt.colorbar(label="Error (K)")
+    plt.title("Error with the true solution")
+    plt.xlabel("x (m)")
+    plt.ylabel("y (m)")
+    plt.show()
 
-##print(np.linalg.norm(Err/(number_of_points*number_of_points)))
+
+
+    # Points de quadrature de Gauss pour un carré de référence [-1,1]x[-1,1]
+    xi_q = np.array([-1/np.sqrt(3), 1/np.sqrt(3)])
+    eta_q = np.array([-1/np.sqrt(3), 1/np.sqrt(3)])
+    w_q = np.ones(4)  
+
+
+    error_L2 = 0.0
+
+    def shape_functions(xi, eta):
+        N1 = (1 - xi) * (1 - eta) / 4
+        N2 = (1 + xi) * (1 - eta) / 4
+        N3 = (1 + xi) * (1 + eta) / 4
+        N4 = (1 - xi) * (1 + eta) / 4
+        return np.array([N1, N2, N3, N4])
+
+
+    number_of_elements = np.sqrt(len(rectangles))
+    for i in range(len(rectangles)):
+        rectangle = rectangles[i]
+        i1 = int(rectangle[0])
+        i2 = int(rectangle[1])
+        i3 = int(rectangle[2])
+        i4 = int(rectangle[3])
+        Uh_nodes = np.array([T_matrix[i1],T_matrix[i2],T_matrix[i3],T_matrix[i4]])
+        U_nodes = np.array([T_true[i1],T_true[i2],T_true[i3],T_true[i4]])
+        
+        Err= U_nodes-Uh_nodes
+        J = (h**2) / 4
+        error_L2_squared = Err**2
+        error_L2 += (np.sum(error_L2_squared))* J
+        
+        # for xi in xi_q:
+        #     for eta in eta_q:
+        #         N = shape_functions(xi, eta)  
+        #         U_q = np.dot(N, U_nodes) 
+        #         Uh_q = np.dot(N, Uh_nodes) 
+        #         Err= U_nodes-Uh_nodes
+        #         J = (h**2) / 4
+        #         #error_L2 += (U_q - Uh_q)**2 * J
+        #         error_L2 += (np.sum(Err))**2 * J
+
+
+    error_L2 = np.sqrt(error_L2)
+    print(error_L2)
+

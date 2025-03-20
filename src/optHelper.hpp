@@ -5,6 +5,8 @@
 #include <Eigen/Sparse>
 #include <map>
 #include <cmath>
+#include <Eigen/Sparse>
+#include <Eigen/SparseLU>
 
 using namespace Eigen;
 
@@ -157,6 +159,17 @@ void solve_sparse_lin_sys(const SparseMatrix<double>& K, const VectorXd& F, Vect
     solver.compute(K);
     solver.setMaxIterations(100000000);
     solver.setTolerance(1e-15);
+
+    U = solver.solve(F);
+}
+
+
+void solve_sparse_lin_sys_LU(const SparseMatrix<double>& K, const VectorXd& F, VectorXd& U) {
+
+    SparseLU<SparseMatrix<double>> solver;
+
+    solver.analyzePattern(K);
+    solver.factorize(K);
 
     U = solver.solve(F);
 }

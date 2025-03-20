@@ -9,7 +9,7 @@ include_directories(/usr/include/eigen3)
 include_directories(src/)
 # The following lines define an executable and compilation flags
 add_executable(main src/main.cpp)
-target_compile_options(main PRIVATE -O3 -march=native -pedantic)
+target_compile_options(main PRIVATE -O3 -DNDEBUG -march=native -pedantic)
 
 set(LOG_DIR "${CMAKE_BINARY_DIR}/output")
 add_custom_target(clean_logs
