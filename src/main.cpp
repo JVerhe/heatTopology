@@ -31,7 +31,7 @@ void readConfig(const std::string& filename, int& number_of_points, int& p, int&
             }
             else if (key == "penalty") {
                 p = std::stod(value);
-                assert(0 <= p);
+                assert(1 <= p);
             }
             else if (key == "filtering") {
                 ft = std::stoi(value);

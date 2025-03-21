@@ -20,17 +20,13 @@ For compiling the first time:
 2. `cmake ..`
 3. `cmake --build .` (everytime you want to compile the project)
 
-Compilation flags can be changed in CMakeLists.txt
-
-Compilation flags can be changed in CMakeLists.txt
-
 ## Running the main.cpp
 
 - A config file inside the folder `/build/config` has to be present. It should look like this:
 
 ```
 points: Number of Discretization points in one dimension (int)
-penalty: Metal fraction penalty exponent (double)
+penalty: Metal fraction penalty exponent that applies regularization (must be higher then 1) (double)
 filtering: The applied filtering technique (0 = no filtering, 1 = sensitivity filtering, 2 = density filtering)
 output: (0 = no output, 1 = visualise output, 2 = run simple benchmark)
 ```
@@ -39,7 +35,7 @@ For example a `config.txt` could look like this: (by default this specific confi
 
 ```
 points 30
-penalty 2
+penalty 2.0
 filtering 2
 output 1
 ```
