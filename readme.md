@@ -32,7 +32,7 @@ Compilation flags can be changed in CMakeLists.txt
 Number of Discretization points in one dimension (int)
 Metal fraction penalty exponent (double)
 Filtering technique (0 = no filtering, 1 = sensitivity filtering, 2 = density filtering)
-output (0 = no output, 1 = visualise output, 2 = run benchmark)
+output (0 = no output, 1 = visualise output, 2 = run simple benchmark)
 ```
 
 For example a `config.txt` could look like this:
@@ -45,12 +45,6 @@ output 1
 ```
 
 The main file can then be executed by running `./main config`
-
-## Plotting the Results
-
-After executing the main program it is possible to visualize the results from inside the build directory via the `plot_results.py` script.
-
-`python3 plot_results.py`
 
 ## Deleting log files
 
