@@ -9,7 +9,7 @@
 
 
 
-void readConfig(const std::string& filename, int& number_of_points, int& p, int& ft, int& visualize) {
+void readConfig(const std::string& filename, int& number_of_points, int& p, int& ft, int& output) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "No test file with this name found" << std::endl;
@@ -37,9 +37,9 @@ void readConfig(const std::string& filename, int& number_of_points, int& p, int&
                 ft = std::stoi(value);
                 assert(0 <= ft && ft <= 2);
             }
-            else if (key == "visualize") {
-                visualize = std::stoi(value);
-                assert(visualize == 0 || visualize == 1);
+            else if (key == "output") {
+                output = std::stoi(value);
+                assert(output == 0 || output == 1 || output == 2);
             }
         }
         catch (...) {
@@ -74,12 +74,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int number_of_points; int p; int ft; int visualize; int time;
+    int number_of_points; int p; int ft; int output;
 
     std::string file_name = argv[1];
     std::string config_file = "config/" + file_name + ".txt";
 
-    readConfig(config_file, number_of_points, p, ft, visualize);
+    readConfig(config_file, number_of_points, p, ft, output);
     double  L = 0.01;
     double T_k = 293;
     double vol_frac = 0.4;
@@ -106,9 +106,9 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::vector<int>> rectangles = create_rectangle_and_mesh(number_of_points);
 
-    optimize(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft, visualize);
+    optimize(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft, output);
 
-    if (visualize == 1) {
+    if (output == 1) {
         // Call Python visualization script
         std::string callPython = "python3 ../src/plot_result.py";
         int rc = system(callPython.c_str());

@@ -1,4 +1,4 @@
 points 30
-penalty 3
+penalty 2
 filtering 2
-visualize 0
+output 1

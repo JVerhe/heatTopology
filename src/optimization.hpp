@@ -57,7 +57,7 @@ double get_cummulative_sum(std::vector<double> durations, int final_idx) {
  * @param L The side length of the plate.
  * @param boundary_temp The fixed temperature at the outlets.
  * @param ft The filtering option: 0=no filtering, 1=sensitivity filtering, 2=density filtering.
- * @param visualize If visualize=0 -> benchmark the code, if visualize = 1 -> save intermediate results and call python script to plot
+ * @param output If output=0 -> benchmark the code, if output = 1 -> save intermediate results and call python script to plot
  *
  * @return void
  */
@@ -71,7 +71,7 @@ void optimize(
     double L,
     double boundary_temp,
     int ft,
-    int visualize = 0
+    int output = 0
 ) {
     std::vector<double> objective_values;
     std::vector<double> temperature_values;
@@ -98,12 +98,12 @@ void optimize(
     std::chrono::steady_clock::time_point t1;
     std::vector<double> loop_durations;
 
-    if (visualize == 0) {
+    if (output == 2) {
         t1 = std::chrono::steady_clock::now();
     }
     while (change > 0.01 && loop < 200) {
         std::chrono::steady_clock::time_point loop_start;
-        if (visualize == 0) {
+        if (output == 2) {
             loop_start = std::chrono::steady_clock::now();
         }
         loop++;
@@ -137,7 +137,7 @@ void optimize(
         change = (xnew - x).cwiseAbs().maxCoeff();
         x = xnew;
 
-        if (visualize == 0) {
+        if (output == 2) {
             std::chrono::steady_clock::time_point loop_end = std::chrono::steady_clock::now();
             std::chrono::duration<double> loop_time = loop_end - loop_start;
             loop_durations.push_back(loop_time.count());
@@ -147,7 +147,7 @@ void optimize(
         objective_values.push_back(c);
         temperature_values.push_back(U.maxCoeff());
 
-        if (visualize == 1) {
+        if (output == 1) {
             std::cout << "It.: " << loop << " Obj.: " << c << " Vol.: " << x_phys.mean() << " ch.: " << change << std::endl;
             if (loop >= 2 && (objective_values[loop - 1] < objective_values[loop - 2] * 0.9) || loop == 1) {
                 char filename[100];
@@ -157,7 +157,7 @@ void optimize(
         }
     }
 
-    if (visualize == 0) { // Print timing results to the console
+    if (output == 2) { // Print timing results to the console
         std::chrono::steady_clock::time_point tend = std::chrono::steady_clock::now();
         std::chrono::duration<double> diff = tend - t1;
         double time = diff.count();
@@ -190,7 +190,7 @@ void optimize(
         }
     }
 
-    if (visualize == 1) {
+    if (output == 1) {
         Eigen::VectorXd objective_value = Eigen::VectorXd::Map(objective_values.data(), objective_values.size());
         char filename_values[100] = "output/objective_values.txt";
         save_result_to_file(objective_value, filename_values);
