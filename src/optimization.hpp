@@ -61,7 +61,7 @@ void optimize(
     int ft
 ) {
     std::vector<double> objective_values;
-    std::vector<double> temperature_values;
+    Eigen::VectorXd temperature_values;
     double E_min = 0.2;
     double E_0 = 65;
     double rmin = 0.04 * nx;
@@ -84,17 +84,19 @@ void optimize(
     std::vector<Eigen::Vector3d> boundary_points = filter_boundary_points_with_index(coordinates, L);
 
 
-    while (change > 0.01 && loop < 200) {
+    while (change > 0.01 && loop < 400) {
         loop++;
 
         SparseMatrix<double> K = find_K(x_phys, rectangles, N_points_1D, K0, 0.2, 65.0, penal);
         VectorXd F = find_F(rectangles, N_points_1D, L);
 
-        auto result = apply_boundary(K, F, boundary_points, boundary_temp);
+        //auto result = apply_boundary(K, F, boundary_points, boundary_temp);
+        auto result = apply_boundary_conditions_optimized(K, F, boundary_points, boundary_temp);
         K = result.first;
         F = result.second;
         VectorXd U = VectorXd::Zero(F.size());
-        solve_sparse_lin_sys(K, F, U);
+        //solve_sparse_lin_sys(K, F, U);
+        solve_sparse_lin_sys_LU(K, F, U);
 
         double c = objective(x_phys, rectangles, U, K0, 0.2, 65, penal);
         VectorXd dc = VectorXd::Zero(x_phys.size());
@@ -103,7 +105,8 @@ void optimize(
 
         if (ft == 1) { // Sensitivity filtering
             dc = H * (x.array() * dc.array()).matrix();
-            dc = dc.array() / (Hs.array().max(1e-3));
+            //dc = dc.array() / (Hs.array().max(1e-3));
+            dc.array() /= (Hs.array() * x.array().cwiseMax(1e-3));
         }
         else if (ft == 2) { // Density filtering
             dc = H * (dc.array() / Hs.array()).matrix();
@@ -117,14 +120,9 @@ void optimize(
         x = xnew;
 
         std::cout << "It.: " << loop << " Obj.: " << c << " Vol.: " << x_phys.mean() << " ch.: " << change << std::endl;
-        // if (loop % 20 == 0) {
-        //     char filename[100];
-        //     sprintf(filename, "output/result_p%.1f_iteration%d.txt", penal, loop);
-        //     save_result_to_file(x, filename);
-        // }
 
         objective_values.push_back(c);
-        temperature_values.push_back(U.maxCoeff());
+        temperature_values = U;
 
     }
 
@@ -132,9 +130,8 @@ void optimize(
     char filename_values[100] = "output/objective_values.txt";
     save_result_to_file(objective_value, filename_values);
 
-    Eigen::VectorXd temperature_value = Eigen::VectorXd::Map(temperature_values.data(), temperature_values.size());
     char filename_temperature[100] = "output/temperature.txt";
-    save_result_to_file(temperature_value, filename_temperature);
+    save_result_to_file(temperature_values, filename_temperature);
 
     char outputfile[100] = "output/density.txt";
     save_result_to_file(x, outputfile);

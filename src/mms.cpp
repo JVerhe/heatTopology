@@ -5,13 +5,17 @@
 #include <iostream>
 #include <meshHelper.hpp>
 #include <cassert>
+#include <iomanip>  
+#include <limits>  
 
 
 using namespace Eigen;
 
 
+
 void save_result_to_file_mms(const Eigen::VectorXd& U, const std::string& filename) {
     std::ofstream file(filename);
+    file << std::setprecision(std::numeric_limits<double>::max_digits10) << std::scientific;
     if (file.is_open()) {
         for (int i = 0; i < U.size(); ++i) {
             file << U(i) << std::endl;
@@ -32,6 +36,15 @@ double function_q(double L, double x, double y, double period) {
     double sin_y = std::sin(factor * y);
     return 2 * (factor * factor) * sin_x * sin_y;
 }
+
+double function_q_with_k_variable(double L, double x, double y, double period) {
+    double factor = (M_PI * period) / (L / 2);
+    double sin_x = std::sin(factor * x);
+    double cos_x = std::cos(factor * x);
+    double sin_y = std::sin(factor * y);
+    return 2 * (factor * factor) * sin_x * sin_y * x - factor * sin_y * cos_x;
+}
+
 
 
 
@@ -57,7 +70,7 @@ std::vector<double> create_q_rectangle_middle(
     for (size_t count = 0; count < rectangles.size(); ++count) {
         int index = rectangles[count][0];
         double x0 = coordinates(index, 0) + h / 2;
-        double y0 = coordinates(index, 1) + h / 2;
+        double y0 = coordinates(index, 1) - h / 2;
         q_rectangle[count] = function_q(L, x0, y0, period);
     }
     return q_rectangle;
@@ -115,7 +128,7 @@ std::vector<Eigen::Vector3d> filter_boundary_points_with_index_mms(const Eigen::
 }
 
 
-std::vector<double> create_T_point(const Eigen::MatrixXd& coordinates, int number_of_points, double L, double period) {
+Eigen::VectorXd create_T_point(const Eigen::MatrixXd& coordinates, int number_of_points, double L, double period) {
     /**
      * Génère la solution T en chaque point du maillage pour la comparer avec la solution numérique.
      *
@@ -126,7 +139,7 @@ std::vector<double> create_T_point(const Eigen::MatrixXd& coordinates, int numbe
      * @return Un vecteur contenant les valeurs de T en chaque point du maillage.
      */
 
-    std::vector<double> T_point(number_of_points * number_of_points, 0.0);
+    Eigen::VectorXd T_point(number_of_points * number_of_points);
 
     for (int i = 0; i < number_of_points; ++i) {
         for (int j = 0; j < number_of_points; ++j) {
@@ -195,15 +208,22 @@ VectorXd solve_simple(
     K = result.first;
     F = result.second;
 
-    VectorXd U = VectorXd::Zero(F.size());
-    solve_sparse_lin_sys_LU(K, F, U);
+    VectorXd T = VectorXd::Zero(F.size());
+    solve_sparse_lin_sys_LU(K, F, T);
 
-    
-    Eigen::VectorXd temperature_value = Eigen::VectorXd::Map(U.data(), U.size());
+    /// SAVE THE RESULTS ///
+    Eigen::VectorXd temperature_value = Eigen::VectorXd::Map(T.data(), T.size());
     char filename_temperature[100] = "output/temperature_mms.txt";
     save_result_to_file_mms(temperature_value, filename_temperature);
+    /////
 
-    std::cout<<coordinates<<std::endl;
+    Eigen::VectorXd T_True = create_T_point(coordinates,N_points_1D,L,period);
+    char filename_correct_temperature[100] = "output/correct_temperature_mms.txt";
+    save_result_to_file_mms(T_True, filename_correct_temperature);
+    Eigen::VectorXd Err = T-T_True;
 
-    return U;
+
+
+
+    return T;
 }

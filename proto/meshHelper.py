@@ -167,7 +167,7 @@ def load_result_from_file(filename):
 
 
 L = 0.01
-number_of_points = 40
+number_of_points = 250
 p = 1
 T_k =  293
 period = 1
@@ -201,7 +201,7 @@ if mms==False :
 
 if mms==True:
     
-    h = (L/2)/(number_of_points-1)
+    h = (L)/(number_of_points-1)
     T_matrix = load_result_from_file("../build/output/temperature_mms.txt")
     T_matrix_r = T_matrix.reshape((number_of_points, number_of_points))
 
@@ -216,9 +216,10 @@ plt.show()
 
 
 
-if mms==False:
+if mms==True:
 
-    T_true  = create_T_point(coordinates,k_constant,L,number_of_points,period)
+    ##T_true  = create_T_point(coordinates,k_constant,L,number_of_points,period)
+    T_true = load_result_from_file("../build/output/correct_temperature_mms.txt")
     T_true_r = T_true.reshape((number_of_points, number_of_points))
     Err  = T_matrix_r - T_true_r
 
@@ -258,22 +259,22 @@ if mms==False:
         Uh_nodes = np.array([T_matrix[i1],T_matrix[i2],T_matrix[i3],T_matrix[i4]])
         U_nodes = np.array([T_true[i1],T_true[i2],T_true[i3],T_true[i4]])
         
-        Err= U_nodes-Uh_nodes
-        J = (h**2) / 4
-        error_L2_squared = Err**2
-        error_L2 += (np.sum(error_L2_squared))* J
         
-        # for xi in xi_q:
-        #     for eta in eta_q:
-        #         N = shape_functions(xi, eta)  
-        #         U_q = np.dot(N, U_nodes) 
-        #         Uh_q = np.dot(N, Uh_nodes) 
-        #         Err= U_nodes-Uh_nodes
-        #         J = (h**2) / 4
-        #         #error_L2 += (U_q - Uh_q)**2 * J
-        #         error_L2 += (np.sum(Err))**2 * J
+        for xi in xi_q:
+            for eta in eta_q:
+                N = shape_functions(xi, eta)  
+                U_q = np.dot(N, U_nodes) 
+                Uh_q = np.dot(N, Uh_nodes) 
+                Err_2 = (Uh_q-U_q)**2
+                #Err_2 = np.abs(U_q-Uh_q)
+                J = (h**2) / 9
+                error_L2 += np.sum(Err_2)* J
 
 
     error_L2 = np.sqrt(error_L2)
-    print(error_L2)
-
+    print("Error :" +str(error_L2))
+    print("Error/h^2 :" +str(error_L2/(h**2)))
+    
+    print(np.log10(error_L2))
+    print(np.log10(h))
+    

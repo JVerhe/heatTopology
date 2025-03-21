@@ -83,21 +83,22 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::vector<int>> rectangles = create_rectangle_and_mesh(number_of_points);
 
-    bool test = true;
+    bool optimization = false;
 
-    if(!test){
+    if(optimization){
         optimize(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
     }else{
+        // We impose a constant x, so we have a constant k equal to one 
         for (int i = 0; i < size; ++i) {
-            x(i) = 0.8/(65-0.2);  // Fill the vector with random values between 0 and 1
+            x(i) = 0.8/(65-0.2);  
         }
-        VectorXd T = solve_simple(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
-        std::cout<<T<<std::endl; 
+        // WE CALL THE FUNCTION WITH 2L SO THAT WE WORK ON
+        std::cout<<"ok"<<std::endl;
+        VectorXd T = solve_simple(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, 2*L, T_k, ft);
     }
 
+    std::string callPython = "python3 ../src/plot_result.py";
+    int rc = system(callPython.c_str());
 
-    // Call Python visualization script
-    // std::string callPython = "python3 ../src/plot_result.py";
-    // int rc = system(callPython.c_str());
     return 0;
 }

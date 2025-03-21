@@ -7,29 +7,29 @@ import re
 
 def listFiles():
     files = os.listdir("output/")
-
+    
     if len(files) == 1:
         print("No files in the output folder")
         exit()
-
-    for file in files:
-        if not file.endswith(".txt"):
-            files.remove(file)
-
-    nonSortedFiles = ["objective_values.txt", "temperature.txt", "density.txt"]
     
-    for f in nonSortedFiles:
-        files.remove(f)
-    files = sorted(files, key=lambda x: int(re.findall(r"iteration\s*(.*?)(?=\.)", x)[-1]))
-    files.extend(nonSortedFiles)
-
+    files = [file for file in files if file.endswith(".txt")]
+    
+    nonSortedFiles = ["objective_values.txt", "temperature.txt", "density.txt"]
+    sortedFiles = [f for f in files if f not in nonSortedFiles]
+    
+    def extract_iteration(filename):
+        match = re.findall(r"iteration\s*(\d+)", filename)
+        return int(match[-1]) if match else float('inf')
+    
+    sortedFiles = sorted(sortedFiles, key=extract_iteration)
+    files = sortedFiles + nonSortedFiles
+    
     print("\n\n")
     print("Choose which file to plot. (Press ctrl+C to exit)")
-
     print("\t[0]\tPlot most optimal solution")
     print("\t[1]\tPlot evolution of solutions")
     print("\t[2]\tExit")
-
+    
     return files
 
 # TODO: input validation
@@ -76,15 +76,19 @@ def plotEvolution(idxList, files):
 
             vector = np.loadtxt("output/" + target_file)
             dim = int(sqrt(vector.size))
-            quad1 = vector.reshape(dim, dim)
-            quad2 = np.fliplr(quad1)
-            quad3 = np.flipud(quad1)
-            quad4 = np.fliplr(quad3)
-            matrix = np.vstack((np.hstack((quad1, quad2)), np.hstack((quad3, quad4))))
+            # quad1 = vector.reshape(dim, dim)
+            # quad2 = np.fliplr(quad1)
+            # quad3 = np.flipud(quad1)
+            # quad4 = np.fliplr(quad3)
+            # matrix = np.vstack((np.hstack((quad1, quad2)), np.hstack((quad3, quad4))))
+            
+            matrix = vector.reshape(dim,dim)
 
-            axis[0,i].imshow(matrix, cmap='gray_r', interpolation='nearest')
+            extent = [0, 0.01, 0, 0.01] 
+            img = axis[0,i].imshow(matrix, cmap='magma', interpolation='nearest',extent=extent)
             iterationNr = re.findall(r"iteration\s*(.*?)(?=\.)", target_file)
-            axis[0,i].set_title("Iteration " + iterationNr[0])
+            plt.colorbar(img, ax=axis[0, i])
+
 
         elif target_file == "density.txt":
             vector = np.loadtxt("output/" + target_file)
@@ -107,7 +111,17 @@ def plotEvolution(idxList, files):
 
         # TODO
         elif target_file == "temperature.txt":
+            vector = np.loadtxt("output/" + target_file)
+            dim = int(sqrt(vector.size))
+            quad1 = vector.reshape(dim, dim)
+            quad2 = np.fliplr(quad1)
+            quad3 = np.flipud(quad1)
+            quad4 = np.fliplr(quad3)
+            matrix = np.vstack((np.hstack((quad1, quad2)), np.hstack((quad3, quad4))))
+            
+            img=axis[0,i].imshow(matrix, cmap='magma', interpolation='nearest')
             axis[0,i].set_title("Temperature (K)")
+            plt.colorbar(img, ax=axis[0, i])
 
     plt.show()
     return

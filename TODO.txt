@@ -1,0 +1,4 @@
+- Check the index error in the result plotting 
+- Check the convergence rate 
+- Problem with the ft==1 ??
+-  In the ploting program, we need to put a paramter if we want to replicate 4 times the graph

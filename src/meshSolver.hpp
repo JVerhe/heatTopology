@@ -22,8 +22,6 @@ Eigen::SparseMatrix<double> find_K(
 
     Eigen::VectorXd k_values = k_min + (k_max - k_min) * v.array().pow(penal);
 
-    std::cout<<k_values<<std::endl;
-
 
     int size = number_of_points * number_of_points;
     Eigen::SparseMatrix<double> K(size, size);
