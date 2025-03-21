@@ -90,12 +90,11 @@ void optimize(
         SparseMatrix<double> K = find_K(x_phys, rectangles, N_points_1D, K0, 0.2, 65.0, penal);
         VectorXd F = find_F(rectangles, N_points_1D, L);
 
-        //auto result = apply_boundary(K, F, boundary_points, boundary_temp);
+
         auto result = apply_boundary_conditions_optimized(K, F, boundary_points, boundary_temp);
         K = result.first;
         F = result.second;
         VectorXd U = VectorXd::Zero(F.size());
-        //solve_sparse_lin_sys(K, F, U);
         solve_sparse_lin_sys_LU(K, F, U);
 
         double c = objective(x_phys, rectangles, U, K0, 0.2, 65, penal);

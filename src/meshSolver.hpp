@@ -81,28 +81,6 @@ std::pair<Eigen::SparseMatrix<double>, Eigen::VectorXd> apply_boundary(Eigen::Sp
     return { K, F };
 }
 
-
-std::pair<Eigen::SparseMatrix<double>, Eigen::VectorXd> apply_boundary_conditions_band(Eigen::SparseMatrix<double>& K, Eigen::VectorXd& F, const std::vector<Eigen::Vector3d>& boundary_points, double T_k) {
-    int n = K.rows();
-    int bandwidth = static_cast<int>(std::sqrt(n)) + 1;  
-
-    for (const auto& point : boundary_points) {
-        int index = static_cast<int>(point[0]); 
-        F -= T_k * K.col(index); 
-    
-        for (int k = std::max(0, index - 4*bandwidth); k < std::min(n, index + 4*bandwidth); ++k) {
-            if (k != index) {  
-                K.coeffRef(k, index) = 0.0;
-                K.coeffRef(index, k) = 0.0;
-            }
-        }
-        K.coeffRef(index, index) = 1.0;
-
-        F(index) = T_k;
-    }
-    return { K, F };
-}
-
 std::pair<Eigen::SparseMatrix<double>, Eigen::VectorXd> apply_boundary_conditions_optimized(Eigen::SparseMatrix<double>& K, Eigen::VectorXd& F, const std::vector<Eigen::Vector3d>& boundary_points, double T_k) {
     int n = K.rows();
     int bandwidth = static_cast<int>(std::sqrt(n)) + 1;  

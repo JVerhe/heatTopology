@@ -164,10 +164,10 @@ def load_result_from_file(filename):
     return U
 
 
-
+"""
 
 L = 0.01
-number_of_points = 250
+number_of_points = 400
 p = 1
 T_k =  293
 period = 1
@@ -212,7 +212,7 @@ plt.colorbar(label="Température (K)")
 plt.title("Distribution de la température")
 plt.xlabel("x (m)")
 plt.ylabel("y (m)")
-plt.show()
+#plt.show()
 
 
 
@@ -229,7 +229,7 @@ if mms==True:
     plt.title("Error with the true solution")
     plt.xlabel("x (m)")
     plt.ylabel("y (m)")
-    plt.show()
+    #plt.show()
 
 
 
@@ -278,3 +278,5 @@ if mms==True:
     print(np.log10(error_L2))
     print(np.log10(h))
     
+
+"""

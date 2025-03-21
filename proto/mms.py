@@ -69,7 +69,7 @@ def create_q_rectangle_middle(rectangles,coordinates,L,number_of_point,period):
         index = int(rectangle[0])
         [x0 , y0] = coordinates[index]
         x0 += h/2
-        y0 += h/2
+        y0 -= h/2
         q_rectangle[count] = function_q(L,x0,y0,period)
         count += 1 
     
@@ -86,7 +86,7 @@ def create_q_rectangle_middle_k_variable(rectangles,coordinates,L,number_of_poin
         index = int(rectangle[0])
         [x0 , y0] = coordinates[index]
         x0 += h/2
-        y0 += h/2
+        y0 -= h/2
         q_rectangle[count] = function_q_with_k_variable(L,x0,y0,period)
         count += 1 
     
