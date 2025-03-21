@@ -35,10 +35,6 @@ double get_cummulative_sum(std::vector<double> durations, int final_idx) {
     return sum;
 }
 
-double get_delta(std::vector<double> v, int final_idx) {
-    return v[0] - v[final_idx];
-}
-
 
 /**
  * @brief Performs a heuristic algorithm for heat topology optimization.
@@ -161,7 +157,6 @@ void optimize(
         }
     }
 
-    // TODO implement with loops instead of this atrocity
     if (visualize == 0) { // Print timing results to the console
         std::chrono::steady_clock::time_point tend = std::chrono::steady_clock::now();
         std::chrono::duration<double> diff = tend - t1;
@@ -172,34 +167,27 @@ void optimize(
         std::cout << "Average iterations per second: " << loop / time << "/s" << std::endl;
         std::cout << std::endl;
 
-        int frac5 = loop / 20;
-        int frac10 = loop / 10;
-        int frac25 = loop / 4;
-        int frac50 = loop / 2;
-        double elapsed5 = get_cummulative_sum(loop_durations, frac5);
-        double elapsed10 = get_cummulative_sum(loop_durations, frac10);
-        double elapsed25 = get_cummulative_sum(loop_durations, frac25);
-        double elapsed50 = get_cummulative_sum(loop_durations, frac50);
-        double elapsed100 = get_cummulative_sum(loop_durations, loop);
-        std::cout << "Average time per loop: " << std::endl;
-        std::cout << "First 5%: " << elapsed5 / frac5 << std::endl;
-        std::cout << "First 10%: " << elapsed10 / frac10 << std::endl;
-        std::cout << "First 25%: " << elapsed25 / frac25 << std::endl;
-        std::cout << "First 50%: " << elapsed50 / frac50 << std::endl;
-        std::cout << "First 100%: " << elapsed100 / loop << std::endl;
-        std::cout << std::endl;
-        double obj5 = get_delta(objective_values, frac5);
-        double obj10 = get_delta(objective_values, frac10);
-        double obj25 = get_delta(objective_values, frac25);
-        double obj50 = get_delta(objective_values, frac50);
-        double obj100 = get_delta(objective_values, loop);
+        int percentages[5] = { 5, 10, 25, 50, 100 };
+        int iteration_segments[5]; // Contains the idx for the first X% of loops
+        for (int i = 0; i < 5; i++) {
+            iteration_segments[i] = loop * percentages[i] * 1e-2;
+        }
 
-        std::cout << "Delta(objective) / time" << std::endl;
-        std::cout << "First 5%: " << obj5 / elapsed5 << "/s" << std::endl;
-        std::cout << "First 10%: " << obj10 / elapsed10 << "/s" << std::endl;
-        std::cout << "First 25%: " << obj25 / elapsed25 << "/s" << std::endl;
-        std::cout << "First 50%: " << obj50 / elapsed50 << "/s" << std::endl;
-        std::cout << "First 100%: " << obj100 / elapsed100 << "/s" << std::endl;
+        double elapsed_time[5];
+        std::cout << "Average duration per optimization loop: " << std::endl;
+        for (int i = 0; i < 5; i++) {
+            elapsed_time[i] = get_cummulative_sum(loop_durations, iteration_segments[i]);
+            std::cout << "First " << percentages[i] << "%: " << elapsed_time[i] / iteration_segments[i] << " s" << std::endl;
+        }
+
+        std::cout << "\n" << std::endl;
+
+        double obj_delta[5];
+        std::cout << "Decrease of objective function divided by time" << std::endl;
+        for (int i = 0; i < 5; i++) {
+            obj_delta[i] = objective_values[0] - objective_values[iteration_segments[i]];
+            std::cout << "First " << percentages[i] << "%: " << obj_delta[i] / elapsed_time[i] << " /s" << std::endl;
+        }
     }
 
     if (visualize == 1) {

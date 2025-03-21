@@ -1,4 +1,4 @@
 points 30
 penalty 3
 filtering 2
-visualize 1
+visualize 0

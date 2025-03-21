@@ -67,11 +67,6 @@ void writeOutput(const std::string& filename, Eigen::VectorXd x) {
 
 }
 
-void signalHandler(int signal) {
-    std::cerr << "No config file with that name was found" << std::endl;
-    std::exit(signal);
-}
-
 int main(int argc, char* argv[]) {
 
     if (argc == 1) {
@@ -81,7 +76,6 @@ int main(int argc, char* argv[]) {
 
     int number_of_points; int p; int ft; int visualize; int time;
 
-    std::signal(SIGSEGV, signalHandler); // TODO: rebuild this part so that the error is only thrown when no config file has been found
     std::string file_name = argv[1];
     std::string config_file = "config/" + file_name + ".txt";
 
@@ -118,6 +112,7 @@ int main(int argc, char* argv[]) {
         // Call Python visualization script
         std::string callPython = "python3 ../src/plot_result.py";
         int rc = system(callPython.c_str());
+        return rc;
     }
     return 0;
 }
