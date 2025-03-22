@@ -24,11 +24,12 @@ def listFiles():
     files.extend(nonSortedFiles)
 
     print("\n\n")
-    print("Choose which file to plot. (Press ctrl+C to exit)")
+    print("Choose which file to plot.")
 
     print("\t[0]\tPlot most optimal solution")
     print("\t[1]\tPlot evolution of solutions")
-    print("\t[2]\tExit")
+    print("\t[2]\tDelete all .txt files and exit")
+    print("\t[3]\tExit")
 
     return files
 
@@ -64,7 +65,7 @@ def plotOptimalSolution(files):
     return
 
 
-def plotEvolution(idxList, files):
+def plotCollection(idxList, files):
     size = len(idxList)
     _, axis = plt.subplots(1, size, squeeze=False)
 
@@ -102,16 +103,26 @@ def plotEvolution(idxList, files):
             vector = np.loadtxt("output/" + target_file)
             axis[0, i].plot(vector)
             axis[0, i].set_yscale('log')
-            axis[0, i].set_title("Cost function (Log Scale)")
+            axis[0, i].set_title("Cost function")
             axis[0, i].set_xlabel("Iteration")
 
-        # TODO
         elif target_file == "temperature.txt":
-            axis[0,i].set_title("Temperature (K)")
+            vector = np.loadtxt("output/" + target_file)
+            axis[0, i].plot(vector)
+            axis[0, i].set_xlabel("Iteration")
+            axis[0,i].set_title("Maximal Temperature (K)")
 
     plt.show()
     return
 
+def deleteFiles(files):
+    try:
+        for f in files:
+            os.remove("output/" + f)
+        print("Removed all the files")
+    except:
+        print("Something went wrong")
+    return
 
 def readUserInput(files):
     try:
@@ -126,9 +137,13 @@ def readUserInput(files):
             return
         case 1:
             plotIndices = listIntermediateSolutions(files)
-            plotEvolution(plotIndices, files)
+            plotCollection(plotIndices, files)
             return
         case 2:
+            deleteFiles(files)
+            exit()
+            return
+        case 3:
             exit()
         case _:
             print("Not a valid input.")

@@ -78,13 +78,13 @@ double objective(const Eigen::VectorXd& v, const std::vector<std::vector<int>>& 
 * @param corners: A nested list with first index as elements and second index as the nodes of each element.
 * @param K0: The local stiffness matrix (4x4).
 * @param p: Penalization factor that pushes fractions of metal towards 0 or 1 (p > 1).
-* @param kmin: minimum conductivity. 
-* @param kmax: maximum conductivity. 
+* @param kmin: minimum conductivity.
+* @param kmax: maximum conductivity.
 * @return void
 */
 void adjoint(Eigen::VectorXd& gradJv, const Eigen::VectorXd& T, const Eigen::VectorXd& v,
     const std::vector<std::vector<int>>& corners,
-    const Eigen::MatrixXd& K0, double p = 3, double kmin=0.2, double kmax=65) {
+    const Eigen::MatrixXd& K0, double p = 3, double kmin = 0.2, double kmax = 65) {
 
     int elements = v.size();
 
