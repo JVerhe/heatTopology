@@ -1,4 +1,10 @@
+Points
 200
+Penality
+5
+Filtering
+2
+Optimization
 1
-0
+k_constant
 0

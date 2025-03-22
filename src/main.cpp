@@ -10,13 +10,14 @@
 
 
 
-void readConfig(const std::string& filename, int& number_of_points, int& p, int& ft, bool& optimisation) {
+void readConfig(const std::string& filename, int& number_of_points, int& p, int& ft, bool& optimisation, bool& k_constant) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "No test file with this name found" << std::endl;
         return;
     }
-    file >> number_of_points >> p >> ft>> optimisation;
+    char space[100];
+    file >> space >> number_of_points >> space >> p >> space >> ft >> space >> optimisation >> space>> k_constant;
     file.close();
 }
 
@@ -49,13 +50,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int number_of_points; int p; int ft; bool optimization;
+    int number_of_points; int p; int ft; bool optimization; bool k_constant;
 
     std::signal(SIGSEGV, signalHandler);
     std::string file_name = argv[1];
     std::string config_file = "config/" + file_name + ".txt";
 
-    readConfig(config_file, number_of_points, p, ft,optimization);
+    readConfig(config_file, number_of_points, p, ft,optimization,k_constant);
 
     double  L = 0.01;
     double T_k = 293;
@@ -86,7 +87,6 @@ int main(int argc, char* argv[]) {
         ////////////////////////////////////////////////////////////////////////////////////////////
         optimize(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
     }else{
-        bool k_constant = true;
         mms(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, 2*L, T_k, k_constant);
     }
 

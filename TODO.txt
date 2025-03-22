@@ -1,2 +1,2 @@
-- Cleaner code to make the error (than Meshhelper)
-- Get some plots for the final presentation for every filtering 
+- Get some plots for the final presentation for every filtering
+- Change the opitmisation code so that it stops when the value don't change 

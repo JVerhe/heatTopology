@@ -3,6 +3,7 @@ from math import sqrt
 import matplotlib.pyplot as plt
 import os
 import re
+import seaborn as sns
 
 
 def listFiles():
@@ -103,11 +104,20 @@ def plotEvolution(idxList, files):
             axis[0,i].set_title("Final Metal fraction")
 
         elif target_file == "objective_values.txt":
-            vector = np.loadtxt("output/" + target_file)
-            axis[0, i].plot(vector)
+            sns.set_style("whitegrid")
+            
+            vector = np.loadtxt("output/objective_values.txt")
+            axis[0, i].plot(vector, color='royalblue', linestyle='-', marker='o', markersize=4, alpha=0.7)
             axis[0, i].set_yscale('log')
-            axis[0, i].set_title("Cost function (Log Scale)")
-            axis[0, i].set_xlabel("Iteration")
+
+            axis[0, i].set_title("Cost Function (Log Scale)", fontsize=14, fontweight='bold')
+            axis[0, i].set_xlabel("Iteration", fontsize=12)
+            axis[0, i].set_ylabel("Objective Value", fontsize=12)
+
+            axis[0, i].grid(which="both", linestyle="--", linewidth=0.5, alpha=0.7)
+            
+            plt.style.use('default')
+            
 
         # TODO
         elif target_file == "temperature.txt":

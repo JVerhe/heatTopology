@@ -12,10 +12,11 @@ def load_result_from_file(filename):
     return U
 
 with open("/home/ari_prezo/Bureau/Project/team_02/build/config/config.txt", 'r') as file:
+    a = file.readline().strip()
     number_of_points = int(file.readline().strip())
 
 
-plot = False
+plot = True
 
 L = 0.01
 h = (L)/(number_of_points-1)
@@ -26,9 +27,9 @@ T_computed_matrix = T_computed.reshape((number_of_points, number_of_points))
 
 if plot==True :
     plt.figure(figsize=(6, 5))
-    plt.imshow(T_computed, cmap='magma', origin='lower', extent=[0, L, 0, L])
-    plt.colorbar(label="Température (K)")
-    plt.title("Distribution de la température")
+    plt.imshow(T_computed_matrix, cmap='magma', origin='lower', extent=[0, L, 0, L])
+    plt.colorbar(label="K")
+    plt.title("Temperature Distribution")
     plt.xlabel("x (m)")
     plt.ylabel("y (m)")
     plt.show()
@@ -90,10 +91,11 @@ def compute_error():
     error_L2 = np.sqrt(error_L2)
     print("Error in L2 norm : " + str(error_L2))
     print("Ratio Error/h^2 : " +str(error_L2/(h**2)))
-    print("Log of the error in L2 norm : " + str(np.log(error_L2)))
-    print("Log of h : " + str(np.log(h)))
+    print("Log of the error in L2 norm : " + str(np.log10(error_L2)))
+    print("Log of h : " + str(np.log10(h)))
 
 if __name__ == "__main__":
+    
     print("Size of the mesh : "+ str(number_of_points*number_of_points))
     compute_error()
     
