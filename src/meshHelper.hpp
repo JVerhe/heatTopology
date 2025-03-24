@@ -85,4 +85,5 @@ std::vector<Eigen::Vector3d> filter_boundary_points_with_index(const Eigen::Matr
     return boundary_points;
 }
 
+
 #endif

@@ -74,7 +74,7 @@ void optimize(
     int output = 0
 ) {
     std::vector<double> objective_values;
-    std::vector<double> temperature_values;
+    Eigen::VectorXd temperature_values;
     double E_min = 0.2;
     double E_0 = 65;
     double rmin = 0.04 * nx;
@@ -101,7 +101,7 @@ void optimize(
     if (output == 2) {
         t1 = std::chrono::steady_clock::now();
     }
-    while (change > 0.01 && loop < 200) {
+    while (change > 0.01 && loop < 400) {
         std::chrono::steady_clock::time_point loop_start;
         if (output == 2) {
             loop_start = std::chrono::steady_clock::now();
@@ -111,11 +111,12 @@ void optimize(
         SparseMatrix<double> K = find_K(x_phys, rectangles, N_points_1D, K0, 0.2, 65.0, penal);
         VectorXd F = find_F(rectangles, N_points_1D, L);
 
-        auto result = apply_boundary(K, F, boundary_points, boundary_temp);
+
+        auto result = apply_boundary_conditions_optimized(K, F, boundary_points, boundary_temp);
         K = result.first;
         F = result.second;
         VectorXd U = VectorXd::Zero(F.size());
-        solve_sparse_lin_sys(K, F, U);
+        solve_sparse_lin_sys_LU(K, F, U);
 
         double c = objective(x_phys, rectangles, U, K0, 0.2, 65, penal);
         VectorXd dc = VectorXd::Zero(x_phys.size());
@@ -124,7 +125,8 @@ void optimize(
 
         if (ft == 1) { // Sensitivity filtering
             dc = H * (x.array() * dc.array()).matrix();
-            dc = dc.array() / (Hs.array().max(1e-3));
+            //dc = dc.array() / (Hs.array().max(1e-3));
+            dc.array() /= (Hs.array() * x.array().cwiseMax(1e-3));
         }
         else if (ft == 2) { // Density filtering
             dc = H * (dc.array() / Hs.array()).matrix();
@@ -145,7 +147,7 @@ void optimize(
 
 
         objective_values.push_back(c);
-        temperature_values.push_back(U.maxCoeff());
+        temperature_values = U;
 
         if (output == 1) {
             std::cout << "It.: " << loop << " Obj.: " << c << " Vol.: " << x_phys.mean() << " ch.: " << change << std::endl;

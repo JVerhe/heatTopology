@@ -5,11 +5,12 @@
 #include <Eigen/Sparse>
 #include <map>
 #include <cmath>
+#include <Eigen/Sparse>
+#include <Eigen/SparseLU>
 
 using namespace Eigen;
 
-Eigen::VectorXd fill_in_k(const Eigen::VectorXd& v, double k_max, double k_min, double p) {
-    /**
+/**
      * Computes the material property values (k) based on the density vector (v).
      *
      * @param v: Vector of densities (values between 0 and 1).
@@ -17,7 +18,8 @@ Eigen::VectorXd fill_in_k(const Eigen::VectorXd& v, double k_max, double k_min, 
      * @param k_min: Minimum stiffness value.
      * @param p: Penalization factor.
      * @return Eigen::VectorXd containing computed k values.
-     */
+*/
+Eigen::VectorXd fill_in_k(const Eigen::VectorXd& v, double k_max, double k_min, double p) {
 
     Eigen::VectorXd k(v.size());
 
@@ -28,11 +30,7 @@ Eigen::VectorXd fill_in_k(const Eigen::VectorXd& v, double k_max, double k_min, 
     return k;
 }
 
-
-double objective(const Eigen::VectorXd& v, const std::vector<std::vector<int>>& rectangles,
-    const Eigen::VectorXd& T, const Eigen::Matrix4d& K0,
-    double k_min, double k_max, double p) {
-    /**
+/**
     * Computes the objective function value for a given material distribution.
     *
     * @param v: Density vector (values between 0 and 1).
@@ -43,7 +41,10 @@ double objective(const Eigen::VectorXd& v, const std::vector<std::vector<int>>& 
     * @param k_max: Maximum stiffness value.
     * @param p: Penalization factor.
     * @return Computed objective function value.
-    */
+*/
+double objective(const Eigen::VectorXd& v, const std::vector<std::vector<int>>& rectangles,
+    const Eigen::VectorXd& T, const Eigen::Matrix4d& K0,
+    double k_min, double k_max, double p) {
 
     double D = 0.0;
     Eigen::VectorXd k_values = fill_in_k(v, k_max, k_min, p);
@@ -70,17 +71,17 @@ double objective(const Eigen::VectorXd& v, const std::vector<std::vector<int>>& 
 }
 
 /**
-* Compute the derivative of the cost function with respect to the fraction of metal for each element.
-*
-* @param gradJv: A column vector of size(n) containing the derivative of the cost function.
-* @param T: The global temperature vector.
-* @param v: The global vector with fractions of metal in each element.
-* @param corners: A nested list with first index as elements and second index as the nodes of each element.
-* @param K0: The local stiffness matrix (4x4).
-* @param p: Penalization factor that pushes fractions of metal towards 0 or 1 (p > 1).
-* @param kmin: minimum conductivity.
-* @param kmax: maximum conductivity.
-* @return void
+    * Compute the derivative of the cost function with respect to the fraction of metal for each element.
+    *
+    * @param gradJv: A column vector of size(n) containing the derivative of the cost function.
+    * @param T: The global temperature vector.
+    * @param v: The global vector with fractions of metal in each element.
+    * @param corners: A nested list with first index as elements and second index as the nodes of each element.
+    * @param K0: The local stiffness matrix (4x4).
+    * @param p: Penalization factor that pushes fractions of metal towards 0 or 1 (p > 1).
+    * @param kmin: minimum conductivity. 
+    * @param kmax: maximum conductivity. 
+    * @return void
 */
 void adjoint(Eigen::VectorXd& gradJv, const Eigen::VectorXd& T, const Eigen::VectorXd& v,
     const std::vector<std::vector<int>>& corners,
@@ -99,6 +100,8 @@ void adjoint(Eigen::VectorXd& gradJv, const Eigen::VectorXd& T, const Eigen::Vec
         gradJv(el) = -0.5 * p * std::pow(v(el), p - 1) * (kmax - kmin) * (Te.transpose() * K0 * Te)(0, 0);
     }
 }
+
+
 void sparse_H_setup(
     const int nx, const int ny,
     const float rmin,
@@ -151,12 +154,59 @@ void create_sparse_matrix(
     }
 }
 
+/**
+ * @brief Solves the linear system \( K T = F \) using the Conjugate Gradient (CG) solver.
+ * 
+ * In this approach, we solve the system of equations \( K T = F \) iteratively using the Conjugate Gradient method. 
+ * The Conjugate Gradient method is well-suited for large, sparse, symmetric, and positive-definite matrices such as the stiffness matrix \( K \).
+ * This solver is particularly efficient when the matrix \( K \) is large, and the solution vector \( T \) is sparse. The method avoids direct matrix inversion 
+ * and instead iteratively improves the solution by minimizing the residual error.
+ * 
+ * The boundary conditions are applied to the solution vector \( T \) by modifying the right-hand side vector \( F \) and adjusting the entries of \( T \) at the boundary nodes 
+ * before running the CG solver. This approach is more flexible when the boundary conditions are complex and need to be enforced at specific grid points.
+ * 
+ * @param K The stiffness matrix representing the system.
+ * @param F The right-hand side vector containing the forces or source terms.
+ * @param T The solution vector, which will contain the temperature or displacement values after solving.
+ * 
+ * @return void
+ */
 void solve_sparse_lin_sys(const SparseMatrix<double>& K, const VectorXd& F, VectorXd& U) {
     ConjugateGradient<SparseMatrix<double>, Lower | Upper> solver;
 
     solver.compute(K);
     solver.setMaxIterations(100000000);
     solver.setTolerance(1e-15);
+
+    U = solver.solve(F);
+}
+
+
+/**
+ * @brief Solves the linear system \( K T = F \) using the LU decomposition solver.
+ * 
+ * This approach uses LU decomposition to solve the system \( K T = F \) directly. LU decomposition is a standard method for solving linear systems 
+ * and is particularly useful when the matrix \( K \) is dense or when we have direct access to the full matrix. In this method, we decompose 
+ * the matrix \( K \) into a lower triangular matrix \( L \) and an upper triangular matrix \( U \), and then solve for \( T \) using forward 
+ * and backward substitution.
+ * 
+ * LU decomposition is more compatible with the way we impose boundary conditions in this context. The boundary conditions can be enforced 
+ * more directly by modifying the matrix \( K \) itself before solving the system, ensuring that the solution vector \( T \) satisfies the boundary 
+ * conditions at the prescribed locations. This is often more straightforward for systems with Dirichlet boundary conditions, where the solution 
+ * at the boundaries is fixed.
+ * 
+ * @param K The stiffness matrix representing the system.
+ * @param F The right-hand side vector containing the forces or source terms.
+ * @param T The solution vector, which will contain the temperature or displacement values after solving.
+ * 
+ * @return void
+ */
+void solve_sparse_lin_sys_LU(const SparseMatrix<double>& K, const VectorXd& F, VectorXd& U) {
+
+    SparseLU<SparseMatrix<double>> solver;
+
+    solver.analyzePattern(K);
+    solver.factorize(K);
 
     U = solver.solve(F);
 }

@@ -9,7 +9,7 @@ include_directories(/usr/include/eigen3)
 include_directories(src/)
 # The following lines define an executable and compilation flags
 add_executable(main src/main.cpp)
-target_compile_options(main PRIVATE -O3 -march=native -pedantic)
+target_compile_options(main PRIVATE -O3 -DNDEBUG -march=native -pedantic)
 
 add_executable(profile_optimization src/profile_optimization.cpp)
 target_compile_options(profile_optimization PRIVATE -O3 -march=native -pedantic)
