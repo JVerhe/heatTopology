@@ -1,6 +1,8 @@
 #include <iostream>
 #include <Eigen/Sparse>
 #include <cassert>
+#include <iostream>
+#include <random>
 
 // Include the next lines in your own files
 #include <testFramework.hpp>
@@ -14,6 +16,9 @@ using namespace Eigen;
 
 void test_optimization_function() 
 {
+    std::random_device rd;
+    std::mt19937 gen(rd());  // Generator with a random seed
+    std::uniform_real_distribution<> dis(0.0, 1.0);
     Eigen::Matrix4d K0;
     K0 << 2.0 / 3, -1.0 / 6, -1.0 / 3, -1.0 / 6,
         -1.0 / 6, 2.0 / 3, -1.0 / 6, -1.0 / 3,
@@ -21,10 +26,17 @@ void test_optimization_function()
         -1.0 / 6, -1.0 / 3, -1.0 / 6, 2.0 / 3;
     int nx = 19;
     std::vector<std::vector<int>> rectangles = create_rectangle_and_mesh(nx+1);
-    VectorXd x = VectorXd::Zero(nx * nx);
+    Eigen::VectorXd x(nx*nx);
+    
     std::vector<int> ps = {1,2,3,4,5};
     for (int ft=0;ft<3;ft++){
         for (int p=1;p<6;p++){
+            for (int i = 0; i < nx*nx; ++i) {
+                x(i) = dis(gen) * 0.5 + 0.5;  // Fill the initial state vector with random values between 0 and 1
+            }
+            x = (x.array() - x.mean()) + 0.4;  // Adjust the mean to 0.4
+            x = x.cwiseMin(1.0).cwiseMax(0.0); // Ensure all values remain in [0,1]
+            
             optimize(K0,x,0.4,nx,nx,p,rectangles,0.01,293,ft);
             // every element of x must be close to zero or one. 
             VectorXd x_rounded = x.array().round();
