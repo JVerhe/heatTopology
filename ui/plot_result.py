@@ -7,7 +7,7 @@ import seaborn as sns
 
 
 def listFiles():
-    files = os.listdir("output/")
+    files = os.listdir("../build/output/")
     
     if len(files) == 1:
         print("No files in the output folder")
@@ -15,15 +15,11 @@ def listFiles():
     
     files = [file for file in files if file.endswith(".txt")]
     
-    nonSortedFiles = ["objective_values.txt", "temperature.txt", "density.txt"]
-    sortedFiles = [f for f in files if f not in nonSortedFiles]
-    
     def extract_iteration(filename):
         match = re.findall(r"iteration\s*(\d+)", filename)
         return int(match[-1]) if match else float('inf')
     
-    sortedFiles = sorted(sortedFiles, key=extract_iteration)
-    files = sortedFiles + nonSortedFiles
+    sortedFiles = sorted(files, key=extract_iteration)
     
     print("\n\n")
     print("Choose which file to plot.")
@@ -33,9 +29,8 @@ def listFiles():
     print("\t[2]\tDelete all .txt files and exit")
     print("\t[3]\tExit")
 
-    return files
+    return sortedFiles
 
-# TODO: input validation
 def listIntermediateSolutions(files):
 
     print("\nType the indices of the graphs you want to plot separated with a space, for example: '1 2 3'\n")
@@ -136,7 +131,7 @@ def deleteFiles(files):
             os.remove("output/" + f)
         print("Removed all the files")
     except:
-        print("Something went wrong")
+        print("Deleted previous files")
     return
 
 def readUserInput(files):

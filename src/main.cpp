@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
 
     if (output == 1) {
         // Call Python visualization script
-        std::string callPython = "python3 ../src/plot_result.py";
+        std::string callPython = "python3 ../ui/plot_result.py";
         int rc = system(callPython.c_str());
         return rc;
     }
