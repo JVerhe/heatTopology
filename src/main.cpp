@@ -101,14 +101,14 @@ int main(int argc, char* argv[]) {
         -1.0 / 3, -1.0 / 6, 2.0 / 3, -1.0 / 6,
         -1.0 / 6, -1.0 / 3, -1.0 / 6, 2.0 / 3;
 
-    Eigen::VectorXd x(size); 
+    Eigen::VectorXd x(size);
 
-    if(optimization){
+    if (optimization) {
         ///////////////////////////// INITIAL RANDOM SOLUTION //////////////////////////////////////
         std::random_device rd;                                                                    //  
         std::mt19937 gen(rd());  // Generator with a random seed                                  //               
         std::uniform_real_distribution<> dis(0.0, 1.0);                                           //
-                                                                                                  //                                                                           //
+        //                                                                           //
         for (int i = 0; i < size; ++i) {                                                          //
             x(i) = dis(gen) * 0.5 + 0.5;  // Fill the vector with random values between 0 and 1   //
         }                                                                                         //                  
@@ -116,8 +116,9 @@ int main(int argc, char* argv[]) {
         x = x.cwiseMin(1.0).cwiseMax(0.0); // Ensure all values remain in [0,1]                   //
         ////////////////////////////////////////////////////////////////////////////////////////////
         optimize(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
-    }else{
-        mms(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, 2*L, T_k, k_constant);
+    }
+    else {
+        mms(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, 2 * L, T_k, k_constant);
     }
 
     if (output == 1) {
