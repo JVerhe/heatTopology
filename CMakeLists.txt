@@ -11,6 +11,9 @@ include_directories(src/)
 add_executable(main src/main.cpp)
 target_compile_options(main PRIVATE -O3 -DNDEBUG -march=native -pedantic)
 
+add_executable(profile_optimization src/profile_optimization.cpp)
+target_compile_options(profile_optimization PRIVATE -O3 -march=native -pedantic)
+
 set(LOG_DIR "${CMAKE_BINARY_DIR}/output")
 add_custom_target(clean_logs
     COMMAND ${CMAKE_COMMAND} -E remove -f ${LOG_DIR}/*.txt

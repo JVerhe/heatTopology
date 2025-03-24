@@ -1,10 +1,6 @@
-Points
-200
-Penality
-5
-Filtering
-2
-Optimization
-1
-k_constant
-0
+points 30
+penalty 2.0
+filtering 2
+output 1
+optimization 1
+k_constant 0

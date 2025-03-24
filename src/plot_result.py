@@ -26,11 +26,13 @@ def listFiles():
     files = sortedFiles + nonSortedFiles
     
     print("\n\n")
-    print("Choose which file to plot. (Press ctrl+C to exit)")
+    print("Choose which file to plot.")
+
     print("\t[0]\tPlot most optimal solution")
     print("\t[1]\tPlot evolution of solutions")
-    print("\t[2]\tExit")
-    
+    print("\t[2]\tDelete all .txt files and exit")
+    print("\t[3]\tExit")
+
     return files
 
 # TODO: input validation
@@ -65,7 +67,7 @@ def plotOptimalSolution(files):
     return
 
 
-def plotEvolution(idxList, files):
+def plotCollection(idxList, files):
     size = len(idxList)
     _, axis = plt.subplots(1, size, squeeze=False)
 
@@ -119,23 +121,23 @@ def plotEvolution(idxList, files):
             plt.style.use('default')
             
 
-        # TODO
         elif target_file == "temperature.txt":
             vector = np.loadtxt("output/" + target_file)
-            dim = int(sqrt(vector.size))
-            quad1 = vector.reshape(dim, dim)
-            quad2 = np.fliplr(quad1)
-            quad3 = np.flipud(quad1)
-            quad4 = np.fliplr(quad3)
-            matrix = np.vstack((np.hstack((quad1, quad2)), np.hstack((quad3, quad4))))
-            
-            img=axis[0,i].imshow(matrix, cmap='magma', interpolation='nearest')
-            axis[0,i].set_title("Temperature (K)")
-            plt.colorbar(img, ax=axis[0, i])
+            axis[0, i].plot(vector)
+            axis[0, i].set_xlabel("Iteration")
+            axis[0,i].set_title("Maximal Temperature (K)")
 
     plt.show()
     return
 
+def deleteFiles(files):
+    try:
+        for f in files:
+            os.remove("output/" + f)
+        print("Removed all the files")
+    except:
+        print("Something went wrong")
+    return
 
 def readUserInput(files):
     try:
@@ -150,9 +152,13 @@ def readUserInput(files):
             return
         case 1:
             plotIndices = listIntermediateSolutions(files)
-            plotEvolution(plotIndices, files)
+            plotCollection(plotIndices, files)
             return
         case 2:
+            deleteFiles(files)
+            exit()
+            return
+        case 3:
             exit()
         case _:
             print("Not a valid input.")

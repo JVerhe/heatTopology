@@ -85,7 +85,7 @@ double objective(const Eigen::VectorXd& v, const std::vector<std::vector<int>>& 
 */
 void adjoint(Eigen::VectorXd& gradJv, const Eigen::VectorXd& T, const Eigen::VectorXd& v,
     const std::vector<std::vector<int>>& corners,
-    const Eigen::MatrixXd& K0, double p = 3, double kmin=0.2, double kmax=65) {
+    const Eigen::MatrixXd& K0, double p = 3, double kmin = 0.2, double kmax = 65) {
 
     int elements = v.size();
 

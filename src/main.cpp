@@ -10,15 +10,51 @@
 
 
 
-void readConfig(const std::string& filename, int& number_of_points, int& p, int& ft, bool& optimisation, bool& k_constant) {
+void readConfig(const std::string& filename, int& number_of_points, int& p, int& ft, int& output, int& optimization, int& k_constant) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "No test file with this name found" << std::endl;
         return;
     }
-    char space[100];
-    file >> space >> number_of_points >> space >> p >> space >> ft >> space >> optimisation >> space>> k_constant;
+    std::string line;
+    std::string key;
+    std::string value;
+
+    while (std::getline(file, line)) {
+        try {
+            key = line.substr(0, line.find(" "));
+            value = line.substr(line.find(" ") + 1, line.size());
+
+            if (key == "points") {
+                number_of_points = std::stoi(value);
+                assert(0 < number_of_points);
+            }
+            else if (key == "penalty") {
+                p = std::stod(value);
+                assert(1 <= p);
+            }
+            else if (key == "filtering") {
+                ft = std::stoi(value);
+                assert(0 <= ft && ft <= 2);
+            }
+            else if (key == "output") {
+                output = std::stoi(value);
+                assert(output == 0 || output == 1 || output == 2);
+            }
+            else if (key == "optimization") {
+                optimization = std::stoi(value);
+            }
+            else if (key == "k_constant") {
+                k_constant = std::stoi(value);
+            }
+        }
+        catch (...) {
+            std::cerr << "Wrong formatting of config file in line: " << line << std::endl;
+            exit(1);
+        }
+    }
     file.close();
+    return;
 }
 
 void writeOutput(const std::string& filename, Eigen::VectorXd x) {
@@ -37,11 +73,6 @@ void writeOutput(const std::string& filename, Eigen::VectorXd x) {
 
 }
 
-void signalHandler(int signal) {
-    std::cerr << "No config file with that name was found" << std::endl;
-    std::exit(signal);
-}
-
 
 int main(int argc, char* argv[]) {
 
@@ -50,13 +81,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int number_of_points; int p; int ft; bool optimization; bool k_constant;
+    int number_of_points; int p; int ft; int output; int optimization; int k_constant;
 
-    std::signal(SIGSEGV, signalHandler);
     std::string file_name = argv[1];
     std::string config_file = "config/" + file_name + ".txt";
 
-    readConfig(config_file, number_of_points, p, ft,optimization,k_constant);
+    readConfig(config_file, number_of_points, p, ft, output, optimization, k_constant);
 
     double  L = 0.01;
     double T_k = 293;
@@ -90,10 +120,12 @@ int main(int argc, char* argv[]) {
         mms(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, 2*L, T_k, k_constant);
     }
 
-    ////////////////// Call the program to plot the result //////
-    std::string callPython = "python3 ../src/plot_result.py";  //
-    int rc = system(callPython.c_str());                       //
-    /////////////////////////////////////////////////////////////
+    if (output == 1) {
+        // Call Python visualization script
+        std::string callPython = "python3 ../src/plot_result.py";
+        int rc = system(callPython.c_str());
+        return rc;
+    }
 
     return 0;
 }
