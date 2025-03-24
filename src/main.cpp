@@ -10,7 +10,7 @@
 
 
 
-void readConfig(const std::string& filename, int& number_of_points, int& p, int& ft, int& output, int& optimization, int& k_constant) {
+void readConfig(const std::string& filename, int& number_of_points, int& p, int& ft, int& output, int& k_constant) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "No test file with this name found" << std::endl;
@@ -39,10 +39,7 @@ void readConfig(const std::string& filename, int& number_of_points, int& p, int&
             }
             else if (key == "output") {
                 output = std::stoi(value);
-                assert(output == 0 || output == 1 || output == 2);
-            }
-            else if (key == "optimization") {
-                optimization = std::stoi(value);
+                assert(output <= 0 && output <= 3);
             }
             else if (key == "k_constant") {
                 k_constant = std::stoi(value);
@@ -81,12 +78,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int number_of_points; int p; int ft; int output; int optimization; int k_constant;
+    int number_of_points; int p; int ft; int output; int k_constant;
 
     std::string file_name = argv[1];
     std::string config_file = "config/" + file_name + ".txt";
 
-    readConfig(config_file, number_of_points, p, ft, output, optimization, k_constant);
+    readConfig(config_file, number_of_points, p, ft, output, k_constant);
 
     double  L = 0.01;
     double T_k = 293;
@@ -103,7 +100,7 @@ int main(int argc, char* argv[]) {
 
     Eigen::VectorXd x(size);
 
-    if (optimization) {
+    if (output <= 2) {
         ///////////////////////////// INITIAL RANDOM SOLUTION //////////////////////////////////////
         std::random_device rd;                                                                    //  
         std::mt19937 gen(rd());  // Generator with a random seed                                  //               
@@ -121,9 +118,9 @@ int main(int argc, char* argv[]) {
         mms(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, 2 * L, T_k, k_constant);
     }
 
-    if (output == 1) {
+    if (output == 1 || output == 3) {
         // Call Python visualization script
-        std::string callPython = "python3 ../src/plot_result.py";
+        std::string callPython = "python3 ../ui/plot_result.py";
         int rc = system(callPython.c_str());
         return rc;
     }
