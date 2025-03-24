@@ -47,7 +47,7 @@ def listIntermediateSolutions(files):
 
 
 def plotOptimalSolution(files):
-    target_file = files[-1]
+    target_file = "density.txt"
     vector = np.loadtxt("output/" + target_file)
     dim = int(sqrt(vector.size))
     quad1 = vector.reshape(dim, dim)

@@ -2,5 +2,4 @@ points 50
 penalty 2
 filtering 2
 output 1
-optimization 0
 k_constant 1
