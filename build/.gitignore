@@ -2,5 +2,5 @@
 *
 # Except this file
 !.gitignore
-!config
-!output
+!config/
+!output/
