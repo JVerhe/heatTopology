@@ -1,5 +1,12 @@
+<<<<<<< HEAD
 points 50
 penalty 2
 filtering 2
 output 1
 k_constant 1
+=======
+points 30
+penalty 2.0
+filtering 1
+output 1
+>>>>>>> made optimization tests more complete
