@@ -30,7 +30,7 @@ void readConfig(const std::string& filename, int& number_of_points, int& p, int&
                 assert(0 < number_of_points);
             }
             else if (key == "penalty") {
-                p = std::stod(value);
+                p = std::stoi(value);
                 assert(1 <= p);
             }
             else if (key == "filtering") {
@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
         x = (x.array() - x.mean()) + 0.4;  // Adjust the mean to 0.4                              //
         x = x.cwiseMin(1.0).cwiseMax(0.0); // Ensure all values remain in [0,1]                   //
         ////////////////////////////////////////////////////////////////////////////////////////////
-        optimize(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft);
+        optimize(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, L, T_k, ft, output);
     }
     else {
         mms(local_matrix, x, vol_frac, number_of_points - 1, number_of_points - 1, p, rectangles, 2 * L, T_k, k_constant);

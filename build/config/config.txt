@@ -1,6 +1,6 @@
-points 30
-penalty 2.0
+points 150
+penalty 2
 filtering 2
 output 1
-optimization 1
+optimization 0
 k_constant 0

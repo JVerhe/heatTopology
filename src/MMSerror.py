@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
-sys.path.append('/home/ari_prezo/Bureau/Project/team_02/proto')
+sys.path.append('../proto')
 from meshHelper import create_rectangle_and_mesh
 
 
@@ -11,9 +11,9 @@ def load_result_from_file(filename):
         U = np.array([float(line.strip()) for line in lines])
     return U
 
-with open("/home/ari_prezo/Bureau/Project/team_02/build/config/config.txt", 'r') as file:
-    a = file.readline().strip()
-    number_of_points = int(file.readline().strip())
+with open("../build/config/config.txt", 'r') as file:
+    a = file.readline().split()
+    number_of_points = int(a[1])
 
 
 plot = True
@@ -22,7 +22,7 @@ L = 0.01
 h = (L)/(number_of_points-1)
 
 
-T_computed = load_result_from_file("/home/ari_prezo/Bureau/Project/team_02/build/output/temperature_mms.txt")
+T_computed = load_result_from_file("../build/output/temperature_mms.txt")
 T_computed_matrix = T_computed.reshape((number_of_points, number_of_points))
 
 if plot==True :
@@ -35,7 +35,7 @@ if plot==True :
     plt.show()
 
 
-T_verification = load_result_from_file("/home/ari_prezo/Bureau/Project/team_02/build/output/correct_temperature_mms.txt")
+T_verification = load_result_from_file("../build/output/correct_temperature_mms.txt")
 T_verification_matrix = T_verification.reshape((number_of_points, number_of_points))
 Err  = T_verification_matrix - T_computed_matrix
 

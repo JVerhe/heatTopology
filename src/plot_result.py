@@ -29,7 +29,7 @@ def listFiles():
     print("Choose which file to plot.")
 
     print("\t[0]\tPlot most optimal solution")
-    print("\t[1]\tPlot evolution of solutions")
+    print("\t[1]\tPlot certain solutions")
     print("\t[2]\tDelete all .txt files and exit")
     print("\t[3]\tExit")
 

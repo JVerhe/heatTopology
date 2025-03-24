@@ -23,7 +23,7 @@ int main() {
 
     std::cout << "ft dim time" << std::endl;
     for (int ft = 0; ft <= 2; ft++) {
-        for (int number_of_points = 10; number_of_points <= 50; number_of_points += 5) {
+        for (int number_of_points = 10; number_of_points <= 100; number_of_points += 5) {
             double total_time = 0;
             for (int repeat = 0; repeat < max_repeats; repeat++) {
                 int size = (number_of_points - 1) * (number_of_points - 1); // Grid size

@@ -101,7 +101,7 @@ void optimize(
     if (output == 2) {
         t1 = std::chrono::steady_clock::now();
     }
-    while (change > 0.01 && loop < 200) {
+    while (change > 0.01 && loop < 400) {
         std::chrono::steady_clock::time_point loop_start;
         if (output == 2) {
             loop_start = std::chrono::steady_clock::now();
