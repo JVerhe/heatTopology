@@ -13,21 +13,20 @@ using namespace Eigen;
 /**
      * Computes the material property values (k) based on the density vector (v).
      *
+     * @param k: contains the material property values, to be filled. 
      * @param v: Vector of densities (values between 0 and 1).
      * @param k_max: Maximum stiffness value.
      * @param k_min: Minimum stiffness value.
      * @param p: Penalization factor.
      * @return Eigen::VectorXd containing computed k values.
 */
-Eigen::VectorXd fill_in_k(const Eigen::VectorXd& v, double k_max, double k_min, double p) {
+void fill_in_k(VectorXd& k, const VectorXd& v, const double k_max, const double k_min, const double p) {
 
-    Eigen::VectorXd k(v.size());
+    assert(k.size()==v.size());
 
     for (int i = 0; i < v.size(); ++i) {
         k(i) = k_min + (k_max - k_min) * std::pow(v(i), p);
     }
-
-    return k;
 }
 
 /**
@@ -47,7 +46,8 @@ double objective(const Eigen::VectorXd& v, const std::vector<std::vector<int>>& 
     double k_min, double k_max, double p) {
 
     double D = 0.0;
-    Eigen::VectorXd k_values = fill_in_k(v, k_max, k_min, p);
+    Eigen::VectorXd k_values = VectorXd::Zero(v.size());
+    fill_in_k(k_values, v, k_max, k_min, p);
 
     assert(v.size() == rectangles.size());
 
