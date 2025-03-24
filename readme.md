@@ -26,7 +26,7 @@ For compiling the first time:
 
 ```
 points: Number of Discretization points in one dimension (int)
-penalty: Metal fraction penalty exponent that applies regularization (must be higher then 1) (double)
+penalty: Metal fraction penalty exponent that applies regularization (must be higher then 1) (int)
 filtering: The applied filtering technique (0 = no filtering, 1 = sensitivity filtering, 2 = density filtering)
 output: (0 = no output, 1 = visualise output, 2 = run simple benchmark, 3 = run MMS test)
 k_constant: Indicates whether the conductivity is a constant in the MMS solution (0 = false, 1 = true)
@@ -35,8 +35,8 @@ k_constant: Indicates whether the conductivity is a constant in the MMS solution
 For example a `config.txt` could look like this: (by default this specific configuration is included in the project)
 
 ```
-points 30
-penalty 2.0
+points 100
+penalty 2
 filtering 2
 output 1
 k_constant 0
@@ -50,7 +50,7 @@ Deleting all the log files in `/build/output` can be done inside the build direc
 
 `cmake --build . --target clean_logs`
 
-Deleting log files can also be done via the Python visualization script.
+Deleting log files can also be done via a Python script, when the output flag is set to 1.
 
 ## Running tests
 
