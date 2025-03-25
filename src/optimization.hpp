@@ -12,6 +12,14 @@
 
 using namespace Eigen;
 
+/**
+ * @brief Saves vector to new .txt file
+ * 
+ * @param U The vector to be saved
+ * @param filename The filename to save the vector in. Should end with .txt . 
+ * 
+ * @return void
+ */
 void save_result_to_file(const Eigen::VectorXd& U, const std::string& filename) {
     std::ofstream file(filename);
     if (file.is_open()) {
@@ -27,6 +35,14 @@ void save_result_to_file(const Eigen::VectorXd& U, const std::string& filename) 
 }
 
 
+/**
+ * @brief Computes the cumulative sum of elements in the vector up to a specified index.
+ * 
+ * @param durations A vector of double values representing durations.
+ * @param final_idx The index up to which the cumulative sum is calculated (exclusive).
+ *                   It should be within the range [0, durations.size()).
+ * @return The cumulative sum of the elements from index 0 to final_idx - 1.
+ */
 double get_cummulative_sum(std::vector<double> durations, int final_idx) {
     double sum = 0.;
     for (int i = 0; i < final_idx; i++) {
@@ -47,8 +63,8 @@ double get_cummulative_sum(std::vector<double> durations, int final_idx) {
  * Efficient topology optimization in MATLAB using 88 lines of code.
  * Structural and Multidisciplinary Optimization, 43, 1-16.
  *
- * @param x the vector containing the initial solution. On return, it contains the solution.
  * @param K0 The constant part of the local conductivity matrix.
+ * @param x the vector containing the initial solution. On return, it contains the solution.
  * @param max_vol_frac The maximum amount of volume percentage of metal on the plate.
  * @param nx The amount of elements in x-direction.
  * @param ny The amount of elements in y-direction.
