@@ -1,5 +1,5 @@
-points 50
-penalty 2
+points 30
+penalty 3
 filtering 2
 output 1
 k_constant 1

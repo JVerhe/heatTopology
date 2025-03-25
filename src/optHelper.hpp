@@ -102,6 +102,18 @@ void adjoint(Eigen::VectorXd& gradJv, const Eigen::VectorXd& T, const Eigen::Vec
 }
 
 
+/**
+ * @brief construct sparse matrix H via vectors iH, jH and sH, s.t. H(iH[k],jH[k]) == sH[k]
+ * 
+ * @param nx amount of elements in x-direction
+ * @param ny amount of elements in y-direction
+ * @param rmin filter radius
+ * @param iH vector containing row-indices of Hcorresponding to non-zero values of H
+ * @param jH vector containing column-indices of H corresponding to non-zero values of H
+ * @param sH vector containing weights of H, s.t. H(iH[k],jH[k]) == sH[k]
+ * 
+ * @return void
+ */
 void sparse_H_setup(
     const int nx, const int ny,
     const float rmin,
@@ -125,6 +137,17 @@ void sparse_H_setup(
     }
 }
 
+/**
+ * @brief set up sparse matrix H used for sensitivity or density filtering.
+ * 
+ * @param nx amount of elements in x-direction
+ * @param ny amount of elements in y-direction
+ * @param rmin filter radius
+ * @param H sparse matrix to be set up
+ * @param Hs row-sum vector of H
+ * 
+ * @return void
+ */
 void create_sparse_matrix(
     const int nx, const int ny,
     const float rmin,
@@ -241,7 +264,21 @@ void update_densities(
     }
 }
 
-
+/**
+ * @brief Finds Lagrange parameter and updates densities according to heuristic optimization scheme as implemented in the reference paper.
+ * 
+ * @param nx amount of elements in x-direction
+ * @param ny amount of elements in y-direction
+ * @param x Vector containing densities of previous solution 
+ * @param xPhys Vector containing densities, updated according to filtering scheme. 
+ * @param xnew Vector containing the densities after update. 
+ * @param dc gradient of objective function. 
+ * @param dv gradient of volume of elements, should be a vector of ones. 
+ * @param H matrix for filtering. 
+ * @param Hs vector for filtering. 
+ * @param ft indicates which filtering is used: 0=no filtering, 1=sensitivity filtering, 2=density filtering. 
+ * @param max_vol_frac maximum fraction of metal in plate. 
+ */
 void find_new_densities(
     const int nx, const int ny,
     const VectorXd& x,
@@ -261,21 +298,6 @@ void find_new_densities(
 
         double lmid = 0.5 * (l1 + l2);
         VectorXd B = (-dc.array() / (dv.array() * lmid)).max(0).sqrt();
-        VectorXd Bx = B.array() * x.array();
-
-        //update_x
-        xnew = Eigen::VectorXd::Zero(x.size());
-        for (int e = 0; e < x.size(); ++e) {
-            if (Bx[e] <= std::max(0.0, x[e] - move)) {
-                xnew[e] = std::max(0.0, x[e] - move);
-            }
-            else if (Bx[e] >= std::min(1.0, x[e] + move)) {
-                xnew[e] = std::min(1.0, x[e] + move);
-            }
-            else {
-                xnew[e] = Bx[e];
-            }
-        }
 
         update_densities(x, xnew, B, move);
 
